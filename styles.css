@@ -32,16 +32,15 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  overflow: hidden;
 }
 
 /* Layout */
 #main {
   display: flex;
-  flex: 1;
+  flex: 1 1 auto;
   padding: 20px;
   gap: 20px;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* Card Style */
@@ -56,6 +55,7 @@ body {
   overflow: auto;
   min-width: 200px;
   min-height: 100px;
+  max-height: calc(100vh - 150px);
 }
 
 .card h2,
@@ -97,6 +97,12 @@ li:hover {
   border: none;
   border-top: 1px solid var(--divider);
   margin: 10px 0;
+}
+
+#bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
 }
 
 /* Player Bar */
@@ -171,6 +177,7 @@ li:hover {
   gap: 20px;
   flex: 1;
   min-width: 200px;
+  max-height: calc(100vh - 150px);
 }
 
 .playlist-item {

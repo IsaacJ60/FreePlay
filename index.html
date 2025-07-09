@@ -29,7 +29,7 @@
     <!-- Grouped panel for queue and recents -->
     <div id="right-panel">
       <div class="card" id="queue-panel">
-        <h2>Queue</h2>
+        <h2 id>Queue</h2>
         <div id="queue-display">
           <p id="current-track"></p>
           <hr class="queue-divider" />
@@ -46,23 +46,25 @@
     </div>
   </div>
 
-  <div id="player">
-    <div id="track-name">No Track</div>
-    <div>
-      <button id="prev">⏮</button>
-      <button id="play">▶</button>
-      <button id="next">⏭</button>
-      <button id="shuffle">🔀</button>
+  <div id="bottom">
+    <div id="player">
+      <div id="track-name">No Track</div>
+      <div>
+        <button id="prev">⏮</button>
+        <button id="play">▶</button>
+        <button id="next">⏭</button>
+        <button id="shuffle">🔀</button>
+      </div>
+      <div id="duration">0:00 / 0:00</div>
+      <div id="volume-control">
+        <label for="volume-slider">🔉</label>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+      </div>
     </div>
-    <div id="duration">0:00 / 0:00</div>
-    <div id="volume-control">
-      <label for="volume-slider">🔉</label>
-      <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
-    </div>
-  </div>
 
-  <div id="seek-control">
-    <input type="range" id="seek-slider" min="0" max="100" step="0.001" value="0">
+    <div id="seek-control">
+      <input type="range" id="seek-slider" min="0" max="100" step="0.001" value="0">
+    </div>
   </div>
 
   <!-- Hidden audio element -->
