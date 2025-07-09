@@ -1,0 +1,255 @@
+:root {
+  --bg: #f2f2f7;
+  --text: #1c1c1e;
+  --card-bg: #ffffff;
+  --divider: #e5e5ea;
+  --hover: #e5e5ea;
+  --shadow: rgba(0, 0, 0, 0.06);
+  --accent: #007aff; /* Blue accent */
+}
+
+body.dark {
+  --bg: #1c1c1e;
+  --text: #f2f2f7;
+  --card-bg: #2c2c2e;
+  --divider: #3a3a3c;
+  --hover: #3a3a3c;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --accent: #0a84ff; /* Blue accent in dark mode */
+}
+
+/* Reset & Base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Layout */
+#main {
+  display: flex;
+  flex: 1;
+  padding: 20px;
+  gap: 20px;
+  overflow: hidden;
+}
+
+/* Card Style */
+.card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 12px var(--shadow);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  min-width: 200px;
+  min-height: 100px;
+}
+
+.card h2,
+.card h3 {
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--text);
+  border-bottom: 1px solid var(--divider);
+  padding-bottom: 6px;
+}
+
+/* Lists */
+ul {
+  list-style: none;
+  padding: 0;
+  overflow-y: auto;
+}
+
+li {
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 0.95rem;
+}
+
+li.playing {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+
+li:hover {
+  background: var(--hover);
+}
+
+.queue-divider {
+  border: none;
+  border-top: 1px solid var(--divider);
+  margin: 10px 0;
+}
+
+/* Player Bar */
+#player {
+  background: var(--card-bg);
+  box-shadow: 0 -4px 12px var(--shadow);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+#track-name {
+  flex: 1;
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+#player button {
+  color: var(--text);
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 6px 12px;
+  transition: color 0.2s ease;
+}
+
+#player button:hover {
+  color: var(--accent);
+}
+
+/* Volume */
+#volume-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#volume-slider {
+  width: 100px;
+  accent-color: var(--accent); /* Ensure the volume slider uses the blue accent */
+}
+
+/* Seek Bar */
+#seek-control {
+  background: var(--bg);
+  padding: 6px 20px;
+  box-shadow: 0 -2px 10px var(--shadow);
+}
+
+#seek-slider {
+  width: 100%;
+  accent-color: var(--accent); /* Ensure the seek slider uses the blue accent */
+}
+
+/* Queue and Recent Panels */
+#queue-panel {
+  border-left: 4px solid var(--accent);
+}
+
+#recents-panel {
+  border-left: 4px solid var(--divider);
+  opacity: 0.95;
+}
+
+#right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.playlist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.playlist-play-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+#playlist-list li.playing {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+
+.playlist-play-btn:hover {
+  background: #005ecb; /* slightly darker blue for hover */
+}
+
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+}
+
+.hidden {
+    display: none;
+}
+.visible {
+    display: flex;
+}
+
+/* Scrollbar - subtle */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--divider);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Responsive Fix */
+@media (max-width: 900px) {
+  #main {
+    flex-direction: column;
+  }
+
+  #right-panel {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  #right-panel .card {
+    flex: 1;
+  }
+}
