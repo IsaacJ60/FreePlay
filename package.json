@@ -7,6 +7,9 @@
     "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "build": {
+    "icon": "assets/favicon"
+  },
   "author": "Isaac Jiang",
   "license": "MIT",
   "devDependencies": {
