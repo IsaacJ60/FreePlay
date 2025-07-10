@@ -157,7 +157,7 @@ ipcMain.on("download-spotify-playlist", async (event, url) => {
             const searchQuery = `${item.title} ${item.subtitle}`;
             const outputPath = path.join(savePath, `${sanitize(title)}.mp3`);
 
-            console.log("Song info:", title)
+            console.log("Song info:", title);
 
             await ytdlp(searchQuery, {
                 extractAudio: true,
