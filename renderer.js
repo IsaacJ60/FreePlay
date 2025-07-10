@@ -1,3 +1,5 @@
+// region elements
+
 const currentTrackElement = document.getElementById("current-track");
 const upcomingList = document.getElementById("upcoming-tracks");
 const trackName = document.getElementById("track-name");
@@ -7,6 +9,10 @@ const playButton = document.getElementById("play");
 const prevButton = document.getElementById("prev");
 const nextButton = document.getElementById("next");
 const shuffleButton = document.getElementById("shuffle");
+const contextMenu = document.getElementById("context-menu");
+const addToQueueBtn = document.getElementById("add-to-front");
+
+// region global vars
 
 let isPlaying = false;
 let currentFile = null;
@@ -17,11 +23,72 @@ let history = [];
 let shuffle = false;
 let currentPlaylist = null;
 let visiblePlaylist = null;
+let contextMenuSongPath = null;
 
+//region song menu
+
+// open context menu at the right position
+function openContextMenu(x, y, songPath) {
+  contextMenuSongPath = songPath;
+
+  contextMenu.classList.remove("hidden");
+  contextMenu.style.visibility = "hidden"; // don't show flash
+  contextMenu.style.left = "0px";
+  contextMenu.style.top = "0px";
+
+  requestAnimationFrame(() => {
+    const menuWidth = contextMenu.offsetWidth;
+    const menuHeight = contextMenu.offsetHeight;
+
+    const padding = 20;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    // Calculate left position — prefer left of button, fallback to right
+    let left = x - menuWidth - padding;
+    if (left < 0) {
+      left = x + padding;
+    }
+
+    // Calculate top — clamp to stay on screen
+    let top = y;
+    if (top + menuHeight > windowHeight) {
+      top = windowHeight - menuHeight - padding;
+    }
+
+    contextMenu.style.left = `${left}px`;
+    contextMenu.style.top = `${top}px`;
+    contextMenu.style.visibility = "visible";
+    contextMenu.classList.remove("hidden");
+  });
+}
+
+function closeContextMenu() {
+  contextMenu.classList.add("hidden");
+  contextMenuSongPath = null;
+}
+
+// Close context menu when clicking outside
+document.addEventListener("click", (e) => {
+  if (!contextMenu.contains(e.target)) closeContextMenu();
+});
+
+// Add to queue button action
+addToQueueBtn.onclick = () => {
+  if (contextMenuSongPath) {
+    addToQueue(contextMenuSongPath);
+    closeContextMenu();
+  }
+};
+
+// region playlists
+
+// handle selecting local folder to use as playlist
 window.electronAPI.onFolderSelected((playlist) => {
   console.log("Folder Selected:", playlist.name);
   const exists = playlists.some((p) => p.name === playlist.name);
   if (exists) {
+    // TODO: display alert or message to user
     console.log(`Playlist "${playlist.name}" already exists. Skipping.`);
     return;
   }
@@ -116,6 +183,7 @@ function loadPlaylist(name) {
     const li = document.createElement("li");
     const fileName = songPath.split(/[\\/]/).pop();
     li.textContent = fileName;
+    li.classList.add("playlist-item");
 
     if (queue[queueIndex] === songPath) {
       li.classList.add("playing");
@@ -126,10 +194,37 @@ function loadPlaylist(name) {
       updateCurrentlyPlayingUI();
     });
 
+    // Add options button
+    const optionsBtn = document.createElement("button");
+    optionsBtn.textContent = "⋯";
+    optionsBtn.className = "options-btn";
+    optionsBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const rect = e.target.getBoundingClientRect();
+      openContextMenu(
+        rect.right,
+        rect.bottom,
+        window.electronAPI.joinPath(playlist.path, songPath)
+      );
+    });
+
+    li.appendChild(optionsBtn);
     songList.appendChild(li);
   });
 
   updateCurrentlyPlayingUI();
+}
+
+function addToQueue(selectedSongPath) {
+  queue = [
+    ...queue.slice(0, queueIndex + 1),
+    selectedSongPath,
+    ...queue.slice(queueIndex + 1),
+  ];
+  updateCurrentlyPlayingUI();
+  renderQueue();
+  console.log(`Added to queue: ${selectedSongPath}`);
+  console.log("QUEUE:", queue);
 }
 
 function updateCurrentlyPlayingUI() {
@@ -404,3 +499,8 @@ window.electronAPI.onPlaylistReady((playlist) => {
   renderPlaylists();
   loadPlaylist(playlist.name);
 });
+
+// setInterval(() => {
+//   const fileNames = queue.map(q => q.split(/[\\/]/).pop());
+//   console.log("Current queue:", fileNames);
+// }, 1000);
