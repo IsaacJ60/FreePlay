@@ -1,4 +1,6 @@
 import { shuffleArray } from "./utils/arrayUtils.js";
+import { updateCurrentlyPlayingUI } from "./utils/renderUtils.js";
+import { state } from "./stores/store.js";
 
 // region elements
 
@@ -16,26 +18,11 @@ const addToQueueBtn = document.getElementById("add-to-front");
 
 // endregion elements
 
-// region global vars
-
-let isPlaying = false;
-let currentFile = null;
-let playlists = [];
-let queue = [];
-let queueIndex = -1;
-let history = [];
-let shuffle = false;
-let currentPlaylist = null;
-let visiblePlaylist = null;
-let contextMenuSongPath = null;
-
-// endregion global vars
-
 // region song menu
 
 // open context menu at the right position
 function openContextMenu(x, y, songPath) {
-    contextMenuSongPath = songPath;
+    state.contextMenuSongPath = songPath;
 
     contextMenu.classList.remove("hidden");
     contextMenu.style.visibility = "hidden"; // don't show flash
@@ -71,7 +58,7 @@ function openContextMenu(x, y, songPath) {
 
 function closeContextMenu() {
     contextMenu.classList.add("hidden");
-    contextMenuSongPath = null;
+    state.contextMenuSongPath = null;
 }
 
 // Close context menu when clicking outside
@@ -81,8 +68,8 @@ document.addEventListener("click", (e) => {
 
 // Add to queue button action
 addToQueueBtn.onclick = () => {
-    if (contextMenuSongPath) {
-        addToQueue(contextMenuSongPath);
+    if (state.contextMenuSongPath) {
+        addToQueue(state.contextMenuSongPath);
         closeContextMenu();
     }
 };
@@ -94,7 +81,7 @@ addToQueueBtn.onclick = () => {
 // handle selecting local folder to use as playlist
 window.electronAPI.onFolderSelected((playlist) => {
     console.log("Folder Selected:", playlist.name);
-    const exists = playlists.some((p) => p.name === playlist.name);
+    const exists = state.playlists.some((p) => p.name === playlist.name);
     if (exists) {
         // TODO: display alert or message to user
         console.log(`Playlist "${playlist.name}" already exists. Skipping.`);
@@ -102,8 +89,8 @@ window.electronAPI.onFolderSelected((playlist) => {
     }
 
     // Add the new playlist to the list and save changes to disk
-    playlists.push(playlist);
-    window.electronAPI.savePlaylists(playlists);
+    state.playlists.push(playlist);
+    window.electronAPI.savePlaylists(state.playlists);
 
     renderPlaylists();
 });
@@ -113,7 +100,7 @@ function renderPlaylists() {
     const playlistList = document.getElementById("playlist-list");
     playlistList.innerHTML = "";
 
-    playlists.forEach((playlist) => {
+    state.playlists.forEach((playlist) => {
         const li = document.createElement("li");
         li.classList.add("playlist-item");
 
@@ -144,33 +131,33 @@ function playPlaylist(playlist, startIndex = 0) {
         return;
     }
 
-    if (shuffle) {
+    if (state.shuffle) {
         const selectedFilePath = window.electronAPI.joinPath(
             playlist.path,
             songs[startIndex]
         );
-        queue = songs
+        state.queue = songs
             .map((song) => window.electronAPI.joinPath(playlist.path, song))
             .filter((path) => path !== selectedFilePath);
-        queue = shuffleArray(queue);
-        queue = [selectedFilePath, ...queue];
-        queueIndex = 0;
+        state.queue = shuffleArray(state.queue);
+        state.queue = [selectedFilePath, ...state.queue];
+        state.queueIndex = 0;
     } else {
-        queue = songs.map((song) =>
+        state.queue = songs.map((song) =>
             window.electronAPI.joinPath(playlist.path, song)
         );
-        queueIndex = startIndex;
+        state.queueIndex = startIndex;
     }
 
-    visiblePlaylist = playlist.name;
-    currentPlaylist = playlist.name;
-    playSong(queue[queueIndex], true);
-    updateCurrentlyPlayingUI();
+    state.visiblePlaylist = playlist.name;
+    state.currentPlaylist = playlist.name;
+    playSong(state.queue[state.queueIndex], true);
+    updateCurrentlyPlayingUIWrapper();
 }
 
 // Load an existing playlist by name and render its songs
 function loadPlaylist(name) {
-    const playlist = playlists.find((p) => p.name === name);
+    const playlist = state.playlists.find((p) => p.name === name);
     if (!playlist) {
         console.error("Playlist not found:", name);
         return;
@@ -185,7 +172,7 @@ function loadPlaylist(name) {
     const songList = document.getElementById("song-list");
     songList.innerHTML = "";
 
-    visiblePlaylist = playlist.name;
+    state.visiblePlaylist = playlist.name;
 
     songs.forEach((songPath, i) => {
         const li = document.createElement("li");
@@ -193,13 +180,13 @@ function loadPlaylist(name) {
         li.textContent = fileName;
         li.classList.add("playlist-item");
 
-        if (queue[queueIndex] === songPath) {
+        if (state.queue[state.queueIndex] === songPath) {
             li.classList.add("playing");
         }
 
         li.addEventListener("click", () => {
             playPlaylist(playlist, i);
-            updateCurrentlyPlayingUI();
+            updateCurrentlyPlayingUIWrapper();
         });
 
         // Add options button to access song options/menu
@@ -220,44 +207,12 @@ function loadPlaylist(name) {
         songList.appendChild(li);
     });
 
-    updateCurrentlyPlayingUI();
+    updateCurrentlyPlayingUIWrapper();
 }
 
 // endregion playlists
 
 // region rendering
-
-// render function to render the currently playing song in the UI
-// and highlight the song in the playlist
-function updateCurrentlyPlayingUI() {
-    const songItems = document.querySelectorAll("#song-list li");
-    const visiblePlaylistName = playlists.find(
-        (p) => p.name === visiblePlaylist
-    );
-    const isSamePlaylist = currentPlaylist === visiblePlaylist;
-
-    songItems.forEach((li, index) => {
-        if (!visiblePlaylistName) return;
-
-        const songPath = visiblePlaylistName.tracks[index];
-
-        if (!songPath) return;
-
-        const fullPath = window.electronAPI.joinPath(
-            visiblePlaylistName.path,
-            songPath
-        );
-        const isCurrentSong = fullPath === queue[queueIndex];
-
-        li.classList.toggle("playing", isCurrentSong && isSamePlaylist);
-    });
-
-    const playlistItems = document.querySelectorAll("#playlist-list li");
-    playlistItems.forEach((li) => {
-        const text = li.querySelector("span")?.textContent || li.textContent;
-        li.classList.toggle("playing", text === visiblePlaylist);
-    });
-}
 
 // custom slider stuff
 function updateSliderFill(slider) {
@@ -267,6 +222,16 @@ function updateSliderFill(slider) {
 }
 
 // endregion rendering
+
+function updateCurrentlyPlayingUIWrapper() {
+    updateCurrentlyPlayingUI(
+        state.playlists,
+        state.queue,
+        state.queueIndex,
+        state.visiblePlaylist,
+        state.currentPlaylist
+    );
+}
 
 // region event listeners
 
@@ -283,9 +248,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     shuffleButton.style.opacity = "0.5";
 
     shuffleButton.addEventListener("click", () => {
-        shuffle = !shuffle;
-        shuffleButton.style.opacity = shuffle ? "1" : "0.5"; // optional visual cue
-        console.log(`Shuffle: ${shuffle}`);
+        state.shuffle = !state.shuffle;
+        shuffleButton.style.opacity = state.shuffle ? "1" : "0.5"; // optional visual cue
+        console.log(`Shuffle: ${state.shuffle}`);
     });
 
     audio.addEventListener("timeupdate", () => {
@@ -317,7 +282,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         audio.volume = volumeSlider.value;
     });
 
-    playlists = await window.electronAPI.requestSavedPlaylists();
+    state.playlists = await window.electronAPI.requestSavedPlaylists();
 
     renderPlaylists();
 });
@@ -337,14 +302,13 @@ audio.addEventListener("timeupdate", () => {
     )}`;
 });
 
-
 // Handle the end of the song
 audio.addEventListener("ended", () => {
-    if (queueIndex + 1 < queue.length) {
-        queueIndex += 1;
-        playSong(queue[queueIndex], true);
+    if (state.queueIndex + 1 < state.queue.length) {
+        state.queueIndex += 1;
+        playSong(state.queue[state.queueIndex], true);
     } else {
-        isPlaying = false;
+        state.isPlaying = false;
         playButton.textContent = "▶";
     }
 });
@@ -361,14 +325,14 @@ window.electronAPI.toggleDarkMode(() => {
 // Handle file selection from the file dialog
 window.electronAPI.onFileSelected((filePath) => {
     playSong(filePath, false);
-    updateCurrentlyPlayingUI();
+    updateCurrentlyPlayingUIWrapper();
 });
 
 // Play a song from the file path
 // If fromQueue is true, it means the song is being played from the queue
 function playSong(filePath, fromQueue = false) {
     console.log("File Selected:", filePath);
-    currentFile = filePath;
+    state.currentFile = filePath;
 
     audio.src = window.electronAPI.toAudioSrc(filePath);
     audio.play();
@@ -376,17 +340,17 @@ function playSong(filePath, fromQueue = false) {
     renderQueue();
     addToHistory(filePath);
     playButton.textContent = "⏸";
-    isPlaying = true;
+    state.isPlaying = true;
 
     if (!fromQueue) {
-        queue = [filePath];
-        queueIndex = 0;
+        state.queue = [filePath];
+        state.queueIndex = 0;
         renderQueue();
     }
 
-    const currentFileName = queue[queueIndex]?.split(/[\\/]/).pop();
+    const currentFileName = state.queue[state.queueIndex]?.split(/[\\/]/).pop();
     trackName.textContent = currentFileName;
-    updateCurrentlyPlayingUI();
+    updateCurrentlyPlayingUIWrapper();
 }
 
 // endregion songs
@@ -395,10 +359,10 @@ function playSong(filePath, fromQueue = false) {
 
 // Add a file path to the history
 function addToHistory(filePath) {
-    if (history[0] !== filePath) {
-        history.unshift(filePath);
-        if (history.length > 10) {
-            history.pop();
+    if (state.history[0] !== filePath) {
+        state.history.unshift(filePath);
+        if (state.history.length > 10) {
+            state.history.pop();
         }
     }
 
@@ -411,20 +375,20 @@ function renderHistory() {
     const historyList = document.getElementById("recent-tracks");
     historyList.innerHTML = "";
 
-    history.forEach((filePath) => {
+    state.history.forEach((filePath) => {
         const fileName = filePath.split(/[\\/]/).pop();
         const li = document.createElement("li");
         li.textContent = fileName;
 
         li.addEventListener("click", () => {
             playSong(filePath, false);
-            currentPlaylist = null;
+            state.currentPlaylist = null;
         });
 
         historyList.appendChild(li);
     });
 
-    updateCurrentlyPlayingUI();
+    updateCurrentlyPlayingUIWrapper();
 }
 
 // endregion history
@@ -436,39 +400,39 @@ function renderHistory() {
 function renderQueue() {
     upcomingList.innerHTML = "";
 
-    if (queue.length === 0) {
+    if (state.queue.length === 0) {
         currentTrackElement.textContent = "No track playing.";
         return;
     }
 
     // Show the currently playing track
-    const currentFileName = queue[queueIndex]?.split(/[\\/]/).pop();
+    const currentFileName = state.queue[state.queueIndex]?.split(/[\\/]/).pop();
     currentTrackElement.textContent = `Now Playing: ${currentFileName}`;
 
     // Show upcoming tracks
-    for (let i = queueIndex + 1; i < queue.length; i++) {
+    for (let i = state.queueIndex + 1; i < state.queue.length; i++) {
         const li = document.createElement("li");
-        const fileName = queue[i].split(/[\\/]/).pop();
+        const fileName = state.queue[i].split(/[\\/]/).pop();
         li.textContent = fileName;
         upcomingList.appendChild(li);
 
         li.addEventListener("click", () => {
-            queueIndex = i;
-            playSong(queue[queueIndex], true);
+            state.queueIndex = i;
+            playSong(state.queue[state.queueIndex], true);
         });
     }
 
-    updateCurrentlyPlayingUI();
+    updateCurrentlyPlayingUIWrapper();
 }
 
 // add a song to the queue (previous queue items, selected song, and remaining queue items)
 function addToQueue(selectedSongPath) {
-    queue = [
-        ...queue.slice(0, queueIndex + 1),
+    state.queue = [
+        ...state.queue.slice(0, state.queueIndex + 1),
         selectedSongPath,
-        ...queue.slice(queueIndex + 1),
+        ...state.queue.slice(state.queueIndex + 1),
     ];
-    updateCurrentlyPlayingUI();
+    updateCurrentlyPlayingUIWrapper();
     renderQueue();
 }
 
@@ -480,7 +444,7 @@ function addToQueue(selectedSongPath) {
 playButton.addEventListener("click", () => {
     if (!audio.src) return;
 
-    if (isPlaying) {
+    if (state.isPlaying) {
         audio.pause();
         playButton.textContent = "▶";
     } else {
@@ -488,26 +452,25 @@ playButton.addEventListener("click", () => {
         playButton.textContent = "⏸";
     }
 
-    isPlaying = !isPlaying;
+    state.isPlaying = !state.isPlaying;
 });
-
 
 // Previous and Next buttons functionality
 prevButton.addEventListener("click", () => {
     if (!audio.src) return;
 
-    if (queueIndex > 0) {
-        queueIndex -= 1;
-        playSong(queue[queueIndex], true); // Pass the full path
+    if (state.queueIndex > 0) {
+        state.queueIndex -= 1;
+        playSong(state.queue[state.queueIndex], true); // Pass the full path
     }
 });
 
 nextButton.addEventListener("click", () => {
     if (!audio.src) return;
 
-    if (queueIndex + 1 < queue.length) {
-        queueIndex += 1;
-        playSong(queue[queueIndex], true); // Pass the full path
+    if (state.queueIndex + 1 < state.queue.length) {
+        state.queueIndex += 1;
+        playSong(state.queue[state.queueIndex], true); // Pass the full path
     }
 });
 
@@ -544,8 +507,8 @@ window.electronAPI.onSpotifyDownload(() => {
 // Handle the event when a Spotify playlist is ready
 // This will add the playlist to the list and save it
 window.electronAPI.onPlaylistReady((playlist) => {
-    playlists.push(playlist);
-    window.electronAPI.savePlaylists(playlists);
+    state.playlists.push(playlist);
+    window.electronAPI.savePlaylists(state.playlists);
     renderPlaylists();
     loadPlaylist(playlist.name);
 });
@@ -555,7 +518,7 @@ window.electronAPI.onPlaylistReady((playlist) => {
 // region debug
 
 // setInterval(() => {
-//   const fileNames = queue.map(q => q.split(/[\\/]/).pop());
+//   const fileNames = state.queue.map(q => q.split(/[\\/]/).pop());
 //   console.log("Current queue:", fileNames);
 // }, 1000);
 
