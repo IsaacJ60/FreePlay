@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'self'; script-src 'self'"
+            content="default-src 'self'; script-src 'self'; media-src 'self' blob:;"
         />
         <meta
             http-equiv="X-Content-Security-Policy"
-            content="default-src 'self'; script-src 'self'"
+            content="default-src 'self'; script-src 'self'; media-src 'self' blob:;"
         />
-        <title>My Music Player</title>
+        <title>FreePlay</title>
         <link rel="stylesheet" href="./styles.css" />
     </head>
 
@@ -102,6 +102,6 @@
             <button id="add-to-front">➕ Add to queue</button>
         </div>
 
-        <script src="renderer.js"></script>
+        <script type="module" src="renderer.js"></script>
     </body>
 </html>

@@ -38,5 +38,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
         return pathToFileURL(filePath).href;
     },
     joinPath: (...args) => path.join(...args),
-    toggleDarkMode: (callback) => ipcRenderer.on("dark-mode", callback)
+    toggleDarkMode: (callback) => ipcRenderer.on("dark-mode", callback),
+    toAudioSrc: (filePath) => {
+        const audioData = fs.readFileSync(filePath);
+        const blob = new Blob([audioData], { type: "audio/mpeg" });
+        return URL.createObjectURL(blob);
+    }
 });

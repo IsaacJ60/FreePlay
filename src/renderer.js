@@ -1,3 +1,5 @@
+import { shuffleArray } from "./utils/arrayUtils.js";
+
 // region elements
 
 const currentTrackElement = document.getElementById("current-track");
@@ -347,37 +349,12 @@ audio.addEventListener("ended", () => {
     }
 });
 
-// endregion event listeners
-
-// region util functions
-
-// util function to shuffle an array
-function shuffleArray(array) {
-    const copy = [...array];
-    for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
-}
-
 window.electronAPI.toggleDarkMode(() => {
     document.body.classList.toggle("dark");
     localStorage.setItem("darkMode", document.body.classList.contains("dark"));
 });
 
-// util function to add a song to the queue (previous queue items, selected song, and remaining queue items)
-function addToQueue(selectedSongPath) {
-    queue = [
-        ...queue.slice(0, queueIndex + 1),
-        selectedSongPath,
-        ...queue.slice(queueIndex + 1),
-    ];
-    updateCurrentlyPlayingUI();
-    renderQueue();
-}
-
-// endregion util functions
+// endregion event listeners
 
 // region songs
 
@@ -393,7 +370,7 @@ function playSong(filePath, fromQueue = false) {
     console.log("File Selected:", filePath);
     currentFile = filePath;
 
-    audio.src = window.electronAPI.toFileUrl(filePath);
+    audio.src = window.electronAPI.toAudioSrc(filePath);
     audio.play();
 
     renderQueue();
@@ -482,6 +459,17 @@ function renderQueue() {
     }
 
     updateCurrentlyPlayingUI();
+}
+
+// add a song to the queue (previous queue items, selected song, and remaining queue items)
+function addToQueue(selectedSongPath) {
+    queue = [
+        ...queue.slice(0, queueIndex + 1),
+        selectedSongPath,
+        ...queue.slice(queueIndex + 1),
+    ];
+    updateCurrentlyPlayingUI();
+    renderQueue();
 }
 
 // endregion queue

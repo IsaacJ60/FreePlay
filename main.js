@@ -8,6 +8,8 @@ const ytdlp = require("youtube-dl-exec");
 const ffmpeg = require("fluent-ffmpeg");
 const ID3Writer = require("node-id3");
 
+const isDev = !app.isPackaged;
+
 const createWindow = () => {
     const win = new BrowserWindow({
         width: 800,
@@ -21,7 +23,12 @@ const createWindow = () => {
         },
     });
 
-    win.loadFile("index.html");
+    if (isDev) {
+        win.loadURL("http://localhost:5173");
+        win.webContents.openDevTools();
+    } else { 
+        win.loadFile(path.join(__dirname, "dist", "index.html"));
+    }
 
     const menuTemplate = [
         {
