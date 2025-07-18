@@ -5,12 +5,16 @@
     --divider: #e5e5ea;
     --hover: #e5e5ea;
     --shadow: rgba(0, 0, 0, 0.06);
-    --accent: #007aff; /* Blue accent */
     --slider: #1c1c1e;
     --secondary-button: #e7e7eb;
     --slider: #ccc; /* unfilled track */
-    --accent: #007aff; /* filled portion */
+    --accent: #e4e3ff; /* filled portion */
+    --accent-text: #001d3c; /* text color for accent elements */
     --menu-bg: #f2f2f7;
+    --secondary-text: #8e8e93; /* greyed out text */
+    --accent-hover: #cfcef4; /* slightly darker blue for hover */
+    --slider-secondary: #8e8e93; /* unfilled track for secondary slider */
+    --current-playlist-bg: #e4e3ff; /* background for current playlist */
 }
 
 body.dark {
@@ -20,12 +24,16 @@ body.dark {
     --divider: #3a3a3c;
     --hover: #3a3a3c;
     --shadow: rgba(0, 0, 0, 0.3);
-    --accent: #0a84ff;
     --slider: #f2f2f7;
     --secondary-button: #48484a;
     --slider: #ccc; /* unfilled track */
-    --accent: #007aff; /* filled portion */
+    --accent: #223797; /* filled portion */
+    --accent-text: #f2f2f7; /* text color for accent elements */
     --menu-bg: #1c1c1e;
+    --secondary-text: #8e8e93; /* greyed out text */
+    --accent-hover: #121b6d; /* slightly darker blue for hover */
+    --slider-secondary: #8e8e93; /* unfilled track for secondary slider */
+    --current-playlist-bg: #223797; /* background for current playlist */
 }
 
 /* Reset & Base */
@@ -79,6 +87,10 @@ body {
     padding-bottom: 6px;
 }
 
+.playlist-btn {
+    color: var(--text);
+}
+
 #song-search,
 #playlist-search {
     width: 100%;
@@ -99,6 +111,86 @@ body {
     box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
 }
 
+.song-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Main list item container */
+.playlist-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    margin-right: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.playlist-item:hover {
+    background-color: var(--hover);
+}
+
+/* Album art image */
+.album-art {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    margin-right: 5px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* Container for title and artist */
+.song-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+    overflow: hidden;
+    min-width: 0;
+}
+
+/* Song Title */
+.song-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Song Artist */
+.song-artist {
+    font-size: 12px;
+    color: var(--secondary-text);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Options button (⋯) */
+.options-btn {
+    background: none;
+    border: none;
+    color: var(--secondary-text);
+    font-size: 1.5rem;
+    padding: 5px 10px;
+    border-radius: 50%;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.options-btn:hover {
+    color: var(--text);
+    background-color: var(--hover);
+}
+
 /* Lists */
 ul {
     list-style: none;
@@ -116,7 +208,7 @@ li {
 
 li.playing {
     background: var(--accent);
-    color: white;
+    color: var(--accent-text);
     font-weight: 600;
 }
 
@@ -179,7 +271,7 @@ li:hover {
 #volume-slider {
     width: 100px;
     accent-color: var(
-        --accent
+        --text
     ); /* Ensure the volume slider uses the blue accent */
 }
 
@@ -257,7 +349,7 @@ li:hover {
     color: white;
     border: none;
     padding: 4px 10px;
-    border-radius: 8px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 0.9rem;
     transition: background 0.2s ease;
@@ -265,12 +357,20 @@ li:hover {
 
 #playlist-list li.playing {
     background: var(--accent);
-    color: white;
+    color: var(--accent-text);
     font-weight: 600;
 }
 
+#playlist-list li.current-playlist:not(.playing) {
+    background: linear-gradient(
+        to right,
+        var(--current-playlist-bg) 0%,
+        var(--card-bg) 100%
+    );
+}
+
 .playlist-play-btn:hover {
-    background: #005ecb; /* slightly darker blue for hover */
+    background: var(--accent-hover); /* slightly darker blue for hover */
 }
 
 #playlist-context-menu button {
@@ -353,7 +453,7 @@ li:hover {
     padding: 10px 20px;
     font-size: 0.95rem;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     cursor: pointer;
     transition: background 0.2s ease;
 }
@@ -505,10 +605,10 @@ input[type="range"]:focus {
     height: 0.3rem;
     background: linear-gradient(
         to right,
-        var(--accent) 0%,
+        var(--accent-hover) 0%,
         var(--accent) var(--progress, 0%),
         var(--slider) var(--progress, 0%),
-        var(--slider) 100%
+        var(--slider-secondary) 100%
     );
     border-radius: 0.5rem;
 }
@@ -517,7 +617,7 @@ input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     margin-top: -5.6px; /* Adjust for center alignment */
-    background-color: var(--accent);
+    background-color: var(--text);
     border-radius: 0.5rem;
     height: 1rem;
     width: 0.5rem;
@@ -528,18 +628,18 @@ input[type="range"]::-webkit-slider-thumb {
 /*********** Firefox ***********/
 #seek-slider::-moz-range-track {
     height: 0.3rem;
-    background: var(--slider);
+    background: var(--text);
     border-radius: 0.5rem;
 }
 
 #seek-slider::-moz-range-progress {
-    background-color: var(--accent);
+    background-color: var(--text);
     height: 0.3rem;
     border-radius: 0.5rem;
 }
 
 #seek-slider::-moz-range-thumb {
-    background-color: var(--accent);
+    background-color: var(--accent-hover);
     border: none;
     border-radius: 0.5rem;
     height: 1rem;
@@ -550,7 +650,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* Base volume slider style */
 #volume-slider {
-    accent-color: var(--accent); /* Simple cross-browser color hint */
+    accent-color: var(--text); /* Simple cross-browser color hint */
     height: 4px;
     cursor: pointer;
 }
@@ -566,6 +666,7 @@ input[type="range"]::-webkit-slider-thumb {
 #volume-slider::-webkit-slider-runnable-track {
     height: 4px;
     border-radius: 2px;
+    background-color: var(--text);
 }
 
 #volume-slider::-webkit-slider-thumb {

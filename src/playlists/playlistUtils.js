@@ -6,7 +6,10 @@ import { playSongWrapper } from "../renderer.js";
 
 // Load an existing playlist by name and render its songs
 export function renderPlaylistTracks(name, contextMenu, searchTerm = "") {
-    const playlist = state.playlists.find((p) => p.name === name);
+    let playlist = state.playlists.find((p) => p.name === name);
+
+    console.log("Rendering playlist:", name, "with tracks:", playlist);
+
     if (!playlist) {
         console.error("Playlist not found:", name);
         return;
@@ -20,7 +23,9 @@ export function renderPlaylistTracks(name, contextMenu, searchTerm = "") {
 
     if (searchTerm) {
         songs = songs.filter((song) =>
-            song.toLowerCase().includes(searchTerm.toLowerCase())
+            (song.title.toLowerCase() + song.artist.toLowerCase()).includes(
+                searchTerm.toLowerCase()
+            )
         );
     }
 
@@ -29,46 +34,68 @@ export function renderPlaylistTracks(name, contextMenu, searchTerm = "") {
 
     state.visiblePlaylist = playlist.name;
 
-    songs.forEach((songPath) => {
+    songs.forEach((song) => {
         const li = document.createElement("li");
-        const fileName = songPath.split(/[\\/]/).pop();
-        const fullPath = window.electronAPI.joinPath(playlist.path, songPath);
-        li.textContent = fileName;
         li.classList.add("playlist-item");
-        li.dataset.songPath = fullPath;
+        li.dataset.songPath = song.filePath;
 
-        if (state.queue[state.queueIndex] === fullPath) {
+        if (state.queue[state.queueIndex] === song.filePath) {
             li.classList.add("playing");
         }
 
+        // ✨ New: Create album art image element
+        const albumArtImg = document.createElement("img");
+        albumArtImg.classList.add("album-art");
+        // Use song's album art or a placeholder if it doesn't exist
+        albumArtImg.src = song.image || "https://placehold.co/100x100";
+        albumArtImg.alt = song.title; // Accessibility for screen readers
+
+        const titleDiv = document.createElement("div");
+        titleDiv.textContent = truncateText(song.title, 30);
+        titleDiv.classList.add("song-title");
+        titleDiv.title = song.title;
+
+        const artistDiv = document.createElement("div");
+        artistDiv.textContent = truncateText(
+            song.artist || "Unknown Artist",
+            30
+        );
+        artistDiv.classList.add("song-artist");
+        artistDiv.title = song.artist || "Unknown Artist";
+
+        const textContainer = document.createElement("div");
+        textContainer.classList.add("song-info");
+        textContainer.appendChild(titleDiv);
+        textContainer.appendChild(artistDiv);
+
         li.addEventListener("click", () => {
             const originalIndex = playlist.tracks.findIndex(
-                (track) => track === songPath
+                (track) => track.filePath === song.filePath
             );
             playPlaylist(playlist, originalIndex);
             updateCurrentlyPlayingUI();
         });
 
-        // Add options button to access song options/menu
         const optionsBtn = document.createElement("button");
         optionsBtn.textContent = "⋯";
         optionsBtn.className = "options-btn";
         optionsBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             const rect = e.target.getBoundingClientRect();
-            openContextMenu(
-                rect.right,
-                rect.bottom,
-                window.electronAPI.joinPath(playlist.path, songPath),
-                contextMenu
-            );
+            openContextMenu(rect.right, rect.bottom, song, contextMenu);
         });
 
+        li.appendChild(albumArtImg);
+        li.appendChild(textContainer);
         li.appendChild(optionsBtn);
         songList.appendChild(li);
     });
 
     updateCurrentlyPlayingUI();
+}
+
+function truncateText(text, maxLength) {
+    return text.length > maxLength ? text.slice(0, maxLength - 1) + "…" : text;
 }
 
 export function playPlaylist(playlist, startIndex = 0) {
@@ -79,20 +106,16 @@ export function playPlaylist(playlist, startIndex = 0) {
     }
 
     if (state.shuffle) {
-        const selectedFilePath = window.electronAPI.joinPath(
-            playlist.path,
-            songs[startIndex]
+        const selectedSong = songs[startIndex];
+
+        state.queue = songs.filter(
+            (song) => song.filePath !== selectedSong.filePath
         );
-        state.queue = songs
-            .map((song) => window.electronAPI.joinPath(playlist.path, song))
-            .filter((path) => path !== selectedFilePath);
         state.queue = shuffleArray(state.queue);
-        state.queue = [selectedFilePath, ...state.queue];
+        state.queue = [selectedSong, ...state.queue];
         state.queueIndex = 0;
     } else {
-        state.queue = songs.map((song) =>
-            window.electronAPI.joinPath(playlist.path, song)
-        );
+        state.queue = songs;
         state.queueIndex = startIndex;
     }
 
@@ -113,7 +136,9 @@ export function renderPlaylists(
 
     if (playlistSearchTerm) {
         playlistDisplay = state.playlists.filter((playlist) =>
-            playlist.name.toLowerCase().includes(playlistSearchTerm.toLowerCase())
+            playlist.name
+                .toLowerCase()
+                .includes(playlistSearchTerm.toLowerCase())
         );
     }
 

@@ -31,8 +31,9 @@ const playlistSearch = document.getElementById("playlist-search");
 
 // endregion DOM
 
-export function playSongWrapper(filePath, fromQueue = false) {
-    playSong(filePath, fromQueue, audio, playButton, trackName);
+export function playSongWrapper(song, fromQueue = false) {
+    //TODO: Refactor this to use the Song model
+    playSong(song, fromQueue, audio, playButton, trackName);
     updateCurrentlyPlayingUI();
 }
 
@@ -214,8 +215,8 @@ window.electronAPI.toggleDarkMode(() => {
 });
 
 // Handle file selection from the file dialog
-window.electronAPI.onFileSelected((filePath) => {
-    playSongWrapper(filePath, false);
+window.electronAPI.onFileSelected((song) => {
+    playSongWrapper(song, false);
     updateCurrentlyPlayingUI();
 });
 

@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'self'; script-src 'self'; media-src 'self' blob:;"
+            content="default-src 'self'; script-src 'self'; media-src 'self' blob:; img-src 'self' data: https://placehold.co *.spotifycdn.com;"
         />
         <meta
             http-equiv="X-Content-Security-Policy"
@@ -18,13 +18,13 @@
         <div id="main">
             <div class="card" id="playlists">
                 <h2>Playlists</h2>
-                <input type="text" id="playlist-search" placeholder="Search for a playlist..." />
+                <input type="text" id="playlist-search" placeholder="Search for playlists..." />
                 <ul id="playlist-list"></ul>
             </div>
 
             <div class="card" id="playlist-songs">
                 <h2>Songs</h2>
-                <input type="text" id="song-search" placeholder="Search for a song..." />
+                <input type="text" id="song-search" placeholder="Search in playlist..." />
                 <ul id="song-list"></ul>
             </div>
 

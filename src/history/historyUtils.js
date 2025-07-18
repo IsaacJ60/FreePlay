@@ -2,9 +2,9 @@ import { state } from "../stores/store.js";
 import { updateCurrentlyPlayingUI } from "../utils/renderUtils.js";
 import { playSongWrapper } from "../renderer.js";
 
-export function addToHistory(filePath) {
-    if (state.history[0] !== filePath) {
-        state.history.unshift(filePath);
+export function addToHistory(song) {
+    if (state.history[0]?.filePath !== song.filePath) {
+        state.history.unshift(song);
         if (state.history.length > 10) {
             state.history.pop();
         }
@@ -19,14 +19,14 @@ function renderHistory() {
     const historyList = document.getElementById("recent-tracks");
     historyList.innerHTML = "";
 
-    state.history.forEach((filePath) => {
-        const fileName = filePath.split(/[\\/]/).pop();
+    state.history.forEach((song) => {
+        const fileName = song.filePath.split(/[\\/]/).pop();
         const li = document.createElement("li");
         li.textContent = fileName;
 
         li.addEventListener("click", () => {
             state.playingSingleTrack = true;
-            playSongWrapper(filePath, false);
+            playSongWrapper(song, false);
             state.currentPlaylist = null;
         });
 

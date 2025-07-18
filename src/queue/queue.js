@@ -1,10 +1,10 @@
 import { state } from "../stores/store.js";
 import { playSongWrapper } from "../renderer.js";
 
-export function addToQueue(selectedSongPath) {
+export function addToQueue(song) {
     state.queue = [
         ...state.queue.slice(0, state.queueIndex + 1),
-        selectedSongPath,
+        song,
         ...state.queue.slice(state.queueIndex + 1),
     ];
 }
@@ -18,13 +18,13 @@ export function renderQueue(upcomingList, currentTrackElement) {
     }
 
     // Show the currently playing track
-    const currentFileName = state.queue[state.queueIndex]?.split(/[\\/]/).pop();
+    const currentFileName = state.queue[state.queueIndex]?.filePath.split(/[\\/]/).pop();
     currentTrackElement.textContent = `Now Playing: ${currentFileName}`;
 
     // Show upcoming tracks
     for (let i = state.queueIndex + 1; i < state.queue.length; i++) {
         const li = document.createElement("li");
-        const fileName = state.queue[i].split(/[\\/]/).pop();
+        const fileName = state.queue[i]?.filePath?.split(/[\\/]/).pop();
         li.textContent = fileName;
         upcomingList.appendChild(li);
 

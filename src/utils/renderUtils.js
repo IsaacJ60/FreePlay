@@ -8,7 +8,7 @@ export function updateCurrentlyPlayingUI() {
         const fullPath = li.dataset.songPath;
         if (!fullPath) return;
 
-        const isCurrentSong = fullPath === state.queue[state.queueIndex];
+        const isCurrentSong = fullPath === state.queue[state.queueIndex]?.filePath;
 
         li.classList.toggle("playing", isCurrentSong && isSamePlaylist && !state.playingSingleTrack);
     });
@@ -17,5 +17,6 @@ export function updateCurrentlyPlayingUI() {
     playlistItems.forEach((li) => {
         const text = li.querySelector("span")?.textContent || li.textContent;
         li.classList.toggle("playing", text === state.visiblePlaylist);
+        li.classList.toggle("current-playlist", text === state.currentPlaylist);
     });
 }

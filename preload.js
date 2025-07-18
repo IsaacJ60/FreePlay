@@ -2,27 +2,52 @@ const { contextBridge, ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
 const { pathToFileURL } = require("url");
+const Song = require("./src/models/Song.js");
 
 contextBridge.exposeInMainWorld("electronAPI", {
+    getUserDataPath: () => ipcRenderer.invoke("get-user-data-path"),
     onFolderSelected: (callback) =>
-        ipcRenderer.on("folder-selected", (e, folderPath) => {
+        ipcRenderer.on("folder-selected", async (e, folderPath) => {
             try {
                 const files = fs.readdirSync(folderPath);
                 const mp3s = files.filter((f) => f.endsWith(".mp3"));
+
+                const userDataPath = await ipcRenderer.invoke("get-user-data-path");
+
+                const playlistsDir = path.join(userDataPath, "playlists");
+                if (!fs.existsSync(playlistsDir)) {
+                    fs.mkdirSync(playlistsDir, { recursive: true });
+                }
+
                 const name = path.basename(folderPath);
-                console.log("Folder contains these .mp3 files:", mp3s); // Debugging line
+                const savePath = path.join(playlistsDir, name);
+                if (!fs.existsSync(savePath)) {
+                    fs.mkdirSync(savePath, { recursive: true });
+                }
+
+                const songList = [];
+
+                for (const fileName of mp3s) {
+                    const originalPath = path.join(folderPath, fileName);
+                    const outputPath = path.join(savePath, fileName);
+
+                    fs.copyFileSync(originalPath, outputPath);
+
+                    const song = new Song(outputPath);
+                    songList.push(song);
+                }
 
                 callback({
                     name,
-                    path: folderPath,
-                    tracks: mp3s,
+                    path: savePath,
+                    tracks: songList,
                 });
             } catch (err) {
                 console.error("Error reading folder:", err);
             }
         }),
     onFileSelected: (callback) =>
-        ipcRenderer.on("file-selected", (e, filePath) => callback(filePath)),
+        ipcRenderer.on("file-selected", (e, song) => callback(song)),
     onSpotifyDownload: (callback) =>
         ipcRenderer.on("spotify-download", (e) => {
             callback();

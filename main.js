@@ -2,8 +2,9 @@ const { app, BrowserWindow, ipcMain, Menu, dialog } = require("electron/main");
 const fs = require("fs");
 const path = require("path");
 const fetch = require("isomorphic-unfetch");
-const { getData } = require("spotify-url-info")(fetch);
+const { getData, getPreview } = require("spotify-url-info")(fetch);
 const ytdlp = require("youtube-dl-exec");
+const Song = require("./src/models/Song.js");
 
 const isDev = !app.isPackaged;
 
@@ -56,10 +57,15 @@ const createWindow = () => {
                                 },
                             ],
                         });
+
+                        const song = new Song(
+                            result.filePaths[0],
+                        )
+
                         if (!result.canceled) {
                             win.webContents.send(
                                 "file-selected",
-                                result.filePaths[0]
+                                song
                             );
                         }
                     },
@@ -150,6 +156,31 @@ ipcMain.on("download-spotify-playlist", async (event, url) => {
             return;
         }
 
+        console.log("Playlist data:", data);
+
+        // if (url === "https://open.spotify.com/playlist/1KRHptv1ZbKoqAt6QLEWTq") {
+        //     console.log("testing playlist detected");
+
+        //     const firstTrack = data.trackList[0];
+
+        //     const url = "https://open.spotify.com/track/" + firstTrack.uri.replace("spotify:track:", "");
+
+        //     const songData = await getPreview(url);
+
+        //     if (!songData) {
+        //         console.log("Failed to fetch song data for testing playlist.");
+        //         return;
+        //     }
+
+        //     console.log("Testing song data!!!:", songData);
+
+        //     // const coverArtUrl = firstTrack.visualIdentity;
+
+        //     // console.log("Cover Art URL:", coverArtUrl);
+
+        //     return;
+        // }
+
         const playlistsDir = path.join(app.getPath("userData"), "playlists");
         if (!fs.existsSync(playlistsDir)) {
             fs.mkdirSync(playlistsDir, { recursive: true });
@@ -169,7 +200,18 @@ ipcMain.on("download-spotify-playlist", async (event, url) => {
 
         if (!savePath) return;
 
+        const songList = [];
+
         for (const item of data.trackList) {
+            const url = "https://open.spotify.com/track/" + item.uri.replace("spotify:track:", "");
+
+            const songData = await getPreview(url);
+
+            if (!songData) {
+                console.log("Failed to fetch song data for:", item.title);
+                continue;
+            }
+
             const title = `${item.title} - ${item.subtitle}`;
             const searchQuery = `${item.title} ${item.subtitle}`;
             const outputPath = path.join(savePath, `${sanitize(title)}.mp3`);
@@ -182,13 +224,15 @@ ipcMain.on("download-spotify-playlist", async (event, url) => {
                 output: outputPath,
                 defaultSearch: "ytsearch",
             });
+
+            const song = new Song(songData, outputPath);
+            songList.push(song);
         }
 
         event.sender.send("playlist-folder-ready", {
             name: data.name,
             path: savePath,
-            // TODO: ADD METADATA TO TRACKS
-            tracks: fs.readdirSync(savePath).filter((f) => f.endsWith(".mp3")),
+            tracks: songList,
         });
     } catch (e) {
         console.log("Error downloading Spotify playlist:", e);
@@ -208,3 +252,7 @@ ipcMain.on("download-spotify-playlist", async (event, url) => {
 function sanitize(filename) {
     return filename.replace(/[\\/:*?"<>|]/g, "");
 }
+
+ipcMain.handle("get-user-data-path", () => {
+    return app.getPath("userData");
+});

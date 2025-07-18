@@ -1,6 +1,6 @@
 # Project Roadmap
 
-This document outlines the future direction of the Music Player project. It serves as a guide for development, prioritizing features and improvements.
+This document outlines the future direction of the FreePlay project. It serves as a guide for development, prioritizing features and improvements.
 
 ## Future Features
 
@@ -15,6 +15,7 @@ This document outlines the future direction of the Music Player project. It serv
 ### v1.2 - Playlist Enhancements
 
 - [ ] **Advanced Playlist Management:**
+    - [ ] Looping playlists
     - [ ] Reorder songs within a playlist.
     - [ ] Edit playlist names.
     - [ ] Add a "favorites" or "liked songs" playlist.

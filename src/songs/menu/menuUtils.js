@@ -1,7 +1,7 @@
 import { state } from "../../stores/store.js";
 
-export function openContextMenu(x, y, songPath, contextMenu) {
-    state.contextMenuSongPath = songPath;
+export function openContextMenu(x, y, song, contextMenu) {
+    state.contextMenuSongPath = song;
 
     contextMenu.classList.remove("hidden");
     contextMenu.style.visibility = "hidden"; // don't show flash
