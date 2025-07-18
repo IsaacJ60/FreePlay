@@ -79,6 +79,26 @@ body {
     padding-bottom: 6px;
 }
 
+#song-search,
+#playlist-search {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--divider);
+    background-color: var(--bg);
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#song-search:focus,
+#playlist-search:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+}
+
 /* Lists */
 ul {
     list-style: none;
@@ -108,6 +128,7 @@ li:hover {
     border: none;
     border-top: 1px solid var(--divider);
     margin: 10px 0;
+    flex-shrink: 0;
 }
 
 #bottom {
@@ -172,11 +193,47 @@ li:hover {
 /* Queue and Recent Panels */
 #queue-panel {
     border-left: 4px solid var(--accent);
+    overflow: hidden; /* Prevent the whole card from scrolling */
+}
+
+#queue-panel h2 {
+    flex-shrink: 0;
+}
+
+#queue-display {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0; /* Fix for flex overflow */
+}
+
+#current-track {
+    flex-shrink: 0; /* Keep now playing visible */
+}
+
+#upcoming-tracks {
+    overflow-y: auto; /* Make only the upcoming list scroll */
 }
 
 #recents-panel {
     border-left: 4px solid var(--divider);
     opacity: 0.95;
+    overflow: hidden; /* Prevent the whole card from scrolling */
+}
+
+#recents-panel h2 {
+    flex-shrink: 0;
+}
+
+#recents-display {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0; /* Fix for flex overflow */
+}
+
+#recent-tracks {
+    overflow-y: auto; /* Make only the list scroll */
 }
 
 #right-panel {
@@ -214,6 +271,20 @@ li:hover {
 
 .playlist-play-btn:hover {
     background: #005ecb; /* slightly darker blue for hover */
+}
+
+#playlist-context-menu button {
+    all: unset;
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--text);
+    transition: background 0.2s ease;
+}
+
+#playlist-context-menu button:hover {
+    background: var(--hover);
 }
 
 .modal {
@@ -285,6 +356,12 @@ li:hover {
     border-radius: 12px;
     cursor: pointer;
     transition: background 0.2s ease;
+}
+
+.loading-playlist {
+    font-style: italic;
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 #submit-spotify-url {

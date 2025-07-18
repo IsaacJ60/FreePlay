@@ -9,6 +9,7 @@ export const state = {
     visiblePlaylist: null,
     currentPlaylist: null,
     contextMenuSongPath: null,
+    playingSingleTrack: false,
 };
 
 export const getters = {

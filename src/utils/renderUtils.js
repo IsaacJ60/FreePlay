@@ -1,29 +1,21 @@
-export function updateCurrentlyPlayingUI(playlists, queue, queueIndex, visiblePlaylist, currentPlaylist) {
+import { state } from "../stores/store.js";
+
+export function updateCurrentlyPlayingUI() {
     const songItems = document.querySelectorAll("#song-list li");
-    const visiblePlaylistName = playlists.find(
-        (p) => p.name === visiblePlaylist
-    );
-    const isSamePlaylist = currentPlaylist === visiblePlaylist;
+    const isSamePlaylist = state.currentPlaylist === state.visiblePlaylist;
 
-    songItems.forEach((li, index) => {
-        if (!visiblePlaylistName) return;
+    songItems.forEach((li) => {
+        const fullPath = li.dataset.songPath;
+        if (!fullPath) return;
 
-        const songPath = visiblePlaylistName.tracks[index];
+        const isCurrentSong = fullPath === state.queue[state.queueIndex];
 
-        if (!songPath) return;
-
-        const fullPath = window.electronAPI.joinPath(
-            visiblePlaylistName.path,
-            songPath
-        );
-        const isCurrentSong = fullPath === queue[queueIndex];
-
-        li.classList.toggle("playing", isCurrentSong && isSamePlaylist);
+        li.classList.toggle("playing", isCurrentSong && isSamePlaylist && !state.playingSingleTrack);
     });
 
     const playlistItems = document.querySelectorAll("#playlist-list li");
     playlistItems.forEach((li) => {
         const text = li.querySelector("span")?.textContent || li.textContent;
-        li.classList.toggle("playing", text === visiblePlaylist);
+        li.classList.toggle("playing", text === state.visiblePlaylist);
     });
 }

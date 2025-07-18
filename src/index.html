@@ -18,11 +18,13 @@
         <div id="main">
             <div class="card" id="playlists">
                 <h2>Playlists</h2>
+                <input type="text" id="playlist-search" placeholder="Search for a playlist..." />
                 <ul id="playlist-list"></ul>
             </div>
 
             <div class="card" id="playlist-songs">
                 <h2>Songs</h2>
+                <input type="text" id="song-search" placeholder="Search for a song..." />
                 <ul id="song-list"></ul>
             </div>
 
@@ -100,6 +102,10 @@
 
         <div id="context-menu" class="song-options-menu hidden">
             <button id="add-to-front">➕ Add to queue</button>
+        </div>
+
+        <div id="playlist-context-menu" class="song-options-menu hidden">
+            <button id="delete-playlist">🗑️ Delete Playlist</button>
         </div>
 
         <script type="module" src="renderer.js"></script>
