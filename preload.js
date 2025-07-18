@@ -31,6 +31,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.send("download-spotify-playlist", url);
     },
     onPlaylistReady: (callback) => ipcRenderer.on("playlist-folder-ready", (_, data) => callback(data)),
+    onPlaylistStartLoad: (callback) => ipcRenderer.on("playlist-start-load", (_, data) => callback(data)),
     requestSavedPlaylists: () => ipcRenderer.invoke("get-saved-playlists"),
     savePlaylists: (playlists) =>
         ipcRenderer.invoke("save-playlists", playlists),
@@ -38,5 +39,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
         return pathToFileURL(filePath).href;
     },
     joinPath: (...args) => path.join(...args),
-    toggleDarkMode: (callback) => ipcRenderer.on("dark-mode", callback)
+    toggleDarkMode: (callback) => ipcRenderer.on("dark-mode", callback),
+    toAudioSrc: (filePath) => {
+        const audioData = fs.readFileSync(filePath);
+        const blob = new Blob([audioData], { type: "audio/mpeg" });
+        return URL.createObjectURL(blob);
+    },
+    onPlaylistLoadError: (callback) =>
+        ipcRenderer.on("playlist-load-error", (_, error) => callback(error)),
 });

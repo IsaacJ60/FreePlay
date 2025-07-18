@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'self'; script-src 'self'"
+            content="default-src 'self'; script-src 'self'; media-src 'self' blob:;"
         />
         <meta
             http-equiv="X-Content-Security-Policy"
-            content="default-src 'self'; script-src 'self'"
+            content="default-src 'self'; script-src 'self'; media-src 'self' blob:;"
         />
-        <title>My Music Player</title>
+        <title>FreePlay</title>
         <link rel="stylesheet" href="./styles.css" />
     </head>
 
@@ -18,11 +18,13 @@
         <div id="main">
             <div class="card" id="playlists">
                 <h2>Playlists</h2>
+                <input type="text" id="playlist-search" placeholder="Search for a playlist..." />
                 <ul id="playlist-list"></ul>
             </div>
 
             <div class="card" id="playlist-songs">
                 <h2>Songs</h2>
+                <input type="text" id="song-search" placeholder="Search for a song..." />
                 <ul id="song-list"></ul>
             </div>
 
@@ -102,6 +104,10 @@
             <button id="add-to-front">➕ Add to queue</button>
         </div>
 
-        <script src="renderer.js"></script>
+        <div id="playlist-context-menu" class="song-options-menu hidden">
+            <button id="delete-playlist">🗑️ Delete Playlist</button>
+        </div>
+
+        <script type="module" src="renderer.js"></script>
     </body>
 </html>
