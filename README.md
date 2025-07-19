@@ -2,12 +2,13 @@
 
 # 🎵 FreePlay Music Player
 
-A sleek, modern desktop music player built with Electron. Supports local playlists, queue management, and even Spotify playlist importing.
+A sleek, modern desktop music player built with Electron and Vite. Supports local playlists, queue management, and even Spotify playlist importing.
 
 ## ✨ Features
 
-* 🎧 Play local music from folders or playlists
-* 📂 Import Spotify playlists via URL
+* 🎧 Play local music from folders
+* 🖼️ Displays cover art and metadata from Spotify
+* 📂 Import public Spotify playlists via URL
 * 📃 Play queue and recent history
 * 💡 Light and dark mode themes
 * 🎛️ Responsive, minimal UI
@@ -27,14 +28,28 @@ cd FreePlay
 npm install
 ```
 
-### 3. Run the app
+### 3. Run the app in development mode
+
+```bash
+npm run dev
+```
+
+This will start the Vite development server.
+
+### 4. Build the app for production
+
+```bash
+npm run build
+```
+
+### 5. Run the production app
 
 ```bash
 npm start
 ```
 
-* Built with [Electron](https://www.electronjs.org/)
+* Built with [Electron](https://www.electronjs.org/) and [Vite](https://vitejs.dev/)
 
 ## 📄 License
 
-MIT License © 2025 Your Name
+MIT License © 2025 Isaac Jiang
