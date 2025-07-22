@@ -18,7 +18,7 @@ class Song {
             const trackInfo = trackInfoOrPath;
             const filePath = maybeFilePath;
 
-            this.date = trackInfo.date;
+            this.date = trackInfo?.date || new Date();
             this.title = trackInfo.title;
             this.type = trackInfo.type || "spotify";
             this.track = trackInfo.track;

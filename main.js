@@ -58,15 +58,10 @@ const createWindow = () => {
                             ],
                         });
 
-                        const song = new Song(
-                            result.filePaths[0],
-                        )
+                        const song = new Song(result.filePaths[0]);
 
                         if (!result.canceled) {
-                            win.webContents.send(
-                                "file-selected",
-                                song
-                            );
+                            win.webContents.send("file-selected", song);
                         }
                     },
                 },
@@ -203,9 +198,19 @@ ipcMain.on("download-spotify-playlist", async (event, url) => {
         const songList = [];
 
         for (const item of data.trackList) {
-            const url = "https://open.spotify.com/track/" + item.uri.replace("spotify:track:", "");
+            const url =
+                "https://open.spotify.com/track/" +
+                item.uri.replace("spotify:track:", "");
 
-            const songData = await getPreview(url);
+
+            let songData;
+
+            try {
+                songData = await getPreview(url);
+            } catch (error) {
+                console.error("Error fetching song data:", error);
+                continue;
+            }
 
             if (!songData) {
                 console.log("Failed to fetch song data for:", item.title);
@@ -238,8 +243,12 @@ ipcMain.on("download-spotify-playlist", async (event, url) => {
         console.log("Error downloading Spotify playlist:", e);
 
         let message = "Failed to download the playlist.";
-        if (e?.message?.includes("Couldn't find any data") || e?.html?.includes("Page not found")) {
-            message = "The playlist could not be loaded. Please make sure it is public.";
+        if (
+            e?.message?.includes("Couldn't find any data") ||
+            e?.html?.includes("Page not found")
+        ) {
+            message =
+                "The playlist could not be loaded. Please make sure it is public.";
         }
 
         // Notify renderer of the error
@@ -255,4 +264,46 @@ function sanitize(filename) {
 
 ipcMain.handle("get-user-data-path", () => {
     return app.getPath("userData");
+});
+
+ipcMain.on("add-song-to-playlist", (event, { playlistName, song }) => {
+    if (fs.existsSync(dataPath)) {
+        const raw = fs.readFileSync(dataPath, "utf8");
+        const playlists = JSON.parse(raw);
+        const playlist = playlists.find((p) => p.name === playlistName);
+        if (playlist) {
+            playlist.tracks.push(song);
+            fs.writeFileSync(dataPath, JSON.stringify(playlists, null, 2));
+
+            event.sender.send("updated-playlist-ready", {
+                name: playlistName,
+                path: playlist.path,
+                tracks: playlist.tracks,
+            });
+        }
+    }
+});
+
+ipcMain.on("delete-song-from-playlist", (event, { playlistName, song }) => {
+    if (!playlistName || !song) return;
+
+    console.log("Deleting song from playlist:", playlistName, song);
+
+    const raw = fs.readFileSync(dataPath, "utf8");
+    const playlists = JSON.parse(raw);
+    const playlist = playlists.find((p) => p.name === playlistName);
+
+    const songIndex = playlist.tracks.findIndex(
+        (s) => s.filePath === song.filePath
+    );
+    if (songIndex === -1) return;
+
+    // Remove song from playlist
+    playlist.tracks.splice(songIndex, 1);
+    fs.writeFileSync(dataPath, JSON.stringify(playlists, null, 2));
+    event.sender.send("updated-playlist-ready", {
+        name: playlistName,
+        path: playlist.path,
+        tracks: playlist.tracks,
+    });
 });

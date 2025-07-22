@@ -3,7 +3,7 @@
     --text: #1c1c1e;
     --card-bg: #ffffff;
     --divider: #e5e5ea;
-    --hover: #e5e5ea;
+    --hover: #eeeef3;
     --shadow: rgba(0, 0, 0, 0.06);
     --slider: #1c1c1e;
     --secondary-button: #e7e7eb;
@@ -108,7 +108,7 @@ body {
 #song-search:focus,
 #playlist-search:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+    box-shadow: 0 0 0 2px var(--accent);
 }
 
 .song-list {
@@ -207,13 +207,21 @@ li {
 }
 
 li.playing {
-    background: var(--accent);
+    background: linear-gradient(
+        to left,
+        var(--accent-hover) 0%,
+        var(--accent) 100%
+    );
     color: var(--accent-text);
     font-weight: 600;
 }
 
-li:hover {
-    background: var(--hover);
+li.playing:hover {
+    background: linear-gradient(
+        to left,
+        var(--accent-hover) 0%,
+        var(--accent) 100%
+    );
 }
 
 .queue-divider {
@@ -245,6 +253,10 @@ li:hover {
     font-weight: 500;
     font-size: 1rem;
     color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 #player button {
@@ -523,7 +535,7 @@ li:hover {
     background: var(--menu-bg);
     box-shadow: 0 12px 28px var(--shadow);
     border-radius: 10px;
-    z-index: 10000;
+    z-index: 1000;
     min-width: 180px;
     max-width: 240px;
     display: flex;
@@ -552,6 +564,7 @@ li:hover {
 
 .song-options-menu button:hover {
     background: var(--hover);
+    outline: none;
 }
 
 .song-options-menu button:focus {
@@ -579,7 +592,7 @@ li:hover {
 
 .options-btn:focus {
     outline: none;
-    box-shadow: 0 0 0 2px var(--accent); /* Optional: styled focus */
+    background-color: var(--hover);
 }
 
 /*********** Baseline, reset styles ***********/

@@ -102,10 +102,25 @@
 
         <div id="context-menu" class="song-options-menu hidden">
             <button id="add-to-front">➕ Add to queue</button>
+            <button id="add-to-playlist">➕ Add to playlist</button>
+            <button id="delete-song">🗑️ Delete song</button>
         </div>
 
         <div id="playlist-context-menu" class="song-options-menu hidden">
             <button id="delete-playlist">🗑️ Delete Playlist</button>
+        </div>
+
+        <div id="add-song-to-playlist-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Add Song to Playlist</h2>
+                <input type="text" id="playlist-search-in-modal" placeholder="Search for a playlist..." />
+                <ul id="playlist-list-in-modal"></ul>
+                <div class="modal-buttons">
+                    <button id="cancel-add-song">Cancel</button>
+                    <button id="submit-add-song">Add</button>
+                </div>
+            </div>
+
         </div>
 
         <script type="module" src="renderer.js"></script>

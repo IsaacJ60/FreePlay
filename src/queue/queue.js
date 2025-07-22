@@ -1,5 +1,6 @@
 import { state } from "../stores/store.js";
 import { playSongWrapper } from "../renderer.js";
+import { truncateText } from "../playlists/playlistUtils.js";
 
 export function addToQueue(song) {
     state.queue = [
@@ -18,20 +19,48 @@ export function renderQueue(upcomingList, currentTrackElement) {
     }
 
     // Show the currently playing track
-    const currentFileName = state.queue[state.queueIndex]?.filePath.split(/[\\/]/).pop();
-    currentTrackElement.textContent = `Now Playing: ${currentFileName}`;
+    const currentFile = state.queue[state.queueIndex];
+    currentTrackElement.textContent = `Now Playing: ${currentFile.title}`;
 
     // Show upcoming tracks
     for (let i = state.queueIndex + 1; i < state.queue.length; i++) {
+        const song = state.queue[i];
+
         const li = document.createElement("li");
-        const fileName = state.queue[i]?.filePath?.split(/[\\/]/).pop();
-        li.textContent = fileName;
-        upcomingList.appendChild(li);
+        li.classList.add("playlist-item");
+        li.dataset.songPath = song.filePath;
 
         li.addEventListener("click", () => {
             state.queueIndex = i;
             state.playingSingleTrack = false;
             playSongWrapper(state.queue[state.queueIndex], true);
         });
+
+        const albumArtImg = document.createElement("img");
+        albumArtImg.classList.add("album-art");
+        albumArtImg.src = song.image || "https://placehold.co/100x100";
+        albumArtImg.alt = song.title;
+
+        const titleDiv = document.createElement("div");
+        titleDiv.textContent = truncateText(song.title, 30);
+        titleDiv.classList.add("song-title");
+        titleDiv.title = song.title;
+
+        const artistDiv = document.createElement("div");
+        artistDiv.textContent = truncateText(
+            song.artist || "Unknown Artist",
+            30
+        );
+        artistDiv.classList.add("song-artist");
+        artistDiv.title = song.artist || "Unknown Artist";
+
+        const textContainer = document.createElement("div");
+        textContainer.classList.add("song-info");
+        textContainer.appendChild(titleDiv);
+        textContainer.appendChild(artistDiv);
+
+        li.appendChild(albumArtImg);
+        li.appendChild(textContainer);
+        upcomingList.appendChild(li);
     }
 }

@@ -1,9 +1,5 @@
 import { updateCurrentlyPlayingUI } from "./utils/renderUtils.js";
-import {
-    deletePlaylist,
-    renderPlaylistTracks,
-    renderPlaylists,
-} from "./playlists/playlistUtils.js";
+import { addPlaylistToView, deletePlaylist, playPlaylist, renderPlaylistTracks, renderPlaylists } from './playlists/playlistUtils.js';
 import { state } from "./stores/store.js";
 import { playSong } from "./songs/songUtils.js";
 import { renderQueue } from "./queue/queue.js";
@@ -23,6 +19,8 @@ const nextButton = document.getElementById("next");
 const shuffleButton = document.getElementById("shuffle");
 const contextMenu = document.getElementById("context-menu");
 const addToQueueBtn = document.getElementById("add-to-front");
+const addToPlaylistBtn = document.getElementById("add-to-playlist");
+const deleteSongBtn = document.getElementById("delete-song");
 const playlistList = document.getElementById("playlist-list");
 const playlistContextMenu = document.getElementById("playlist-context-menu");
 const deletePlaylistBtn = document.getElementById("delete-playlist");
@@ -32,7 +30,6 @@ const playlistSearch = document.getElementById("playlist-search");
 // endregion DOM
 
 export function playSongWrapper(song, fromQueue = false) {
-    //TODO: Refactor this to use the Song model
     playSong(song, fromQueue, audio, playButton, trackName);
     updateCurrentlyPlayingUI();
 }
@@ -57,12 +54,11 @@ window.electronAPI.onFolderSelected((playlist) => {
     state.playlists.push(playlist);
     window.electronAPI.savePlaylists(state.playlists);
 
-    renderPlaylists(contextMenu, playlistContextMenu, playlistList);
+    addPlaylistToView(playlist, contextMenu, playlistContextMenu, playlistList);
 });
 
-// Load an existing playlist by name and render its songs
-function loadPlaylistWrapper(name, searchTerm = "") {
-    renderPlaylistTracks(name, contextMenu, searchTerm);
+function loadPlaylistWrapper(playlist, searchTerm = "") {
+    renderPlaylistTracks(playlist, contextMenu, searchTerm);
 }
 
 // endregion playlists
@@ -77,7 +73,7 @@ export function renderQueueWrapper() {
 }
 
 function addToQueueWrapper() {
-    addToQueue(state.contextMenuSongPath);
+    addToQueue(state.contextMenuSong);
     updateCurrentlyPlayingUI();
     renderQueueWrapper();
 }
@@ -165,11 +161,79 @@ document.addEventListener("click", (e) => {
 });
 
 addToQueueBtn.onclick = () => {
-    if (state.contextMenuSongPath) {
+    if (state.contextMenuSong) {
         addToQueueWrapper();
         closeAllContextMenus();
     }
 };
+
+addToPlaylistBtn.onclick = () => {
+    if (state.contextMenuSong) {
+        openAddToPlaylistModal();
+        closeAllContextMenus();
+    }
+};
+
+function openAddToPlaylistModal() {
+    const modal = document.getElementById("add-song-to-playlist-modal");
+    const playlistListInModal = document.getElementById("playlist-list-in-modal");
+    const searchInput = document.getElementById("playlist-search-in-modal");
+    const cancelBtn = document.getElementById("cancel-add-song");
+    const addBtn = document.getElementById("submit-add-song");
+
+    let selectedPlaylist = null;
+
+    function renderPlaylistsForModal(filter = "") {
+        playlistListInModal.innerHTML = "";
+        const filteredPlaylists = state.playlists.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+        filteredPlaylists.forEach(playlist => {
+            const li = document.createElement("li");
+            li.textContent = playlist.name;
+            li.addEventListener("click", () => {
+                selectedPlaylist = playlist;
+                const items = playlistListInModal.querySelectorAll("li");
+                items.forEach(item => item.classList.remove("playing"));
+                li.classList.add("playing");
+            });
+            playlistListInModal.appendChild(li);
+        });
+    }
+
+    renderPlaylistsForModal();
+
+    searchInput.addEventListener("input", (e) => {
+        renderPlaylistsForModal(e.target.value);
+    });
+
+    modal.classList.remove("hidden");
+
+    cancelBtn.onclick = () => {
+        modal.classList.add("hidden");
+    };
+
+    addBtn.onclick = async () => {
+        if (selectedPlaylist && state.modalMenuSong) {
+            console.log("ADDING");
+            window.electronAPI.addSongToPlaylist({ playlistName: selectedPlaylist.name, song: state.modalMenuSong });
+            modal.classList.add("hidden");
+            state.playlists = await window.electronAPI.requestSavedPlaylists();
+            renderPlaylists(contextMenu, playlistContextMenu, playlistList);
+        }
+    };
+}
+
+deleteSongBtn.onclick = () => {
+    if (state.contextMenuSong) {      
+        deleteSong(state.contextMenuSong);  
+        closeAllContextMenus();
+    }
+};
+
+function deleteSong(song) {
+    console.log("Deleting song:", song);
+    window.electronAPI.deleteSongFromPlaylist({ playlistName: state.visiblePlaylist.name, song: song });
+}
+
 
 deletePlaylistBtn.onclick = () => {
     if (state.contextMenuPlaylistName) {
@@ -206,8 +270,19 @@ audio.addEventListener("ended", () => {
     } else {
         state.isPlaying = false;
         playButton.textContent = "▶";
+        handlePlaylistRestart();
     }
 });
+
+function handlePlaylistRestart() {
+    if (state.playlistLoop && state.currentPlaylist) {
+        playPlaylist(getCurrentPlaylist());
+    }
+}
+
+function getCurrentPlaylist() {
+    return state.currentPlaylist;
+}
 
 window.electronAPI.toggleDarkMode(() => {
     document.body.classList.toggle("dark");
@@ -261,6 +336,8 @@ nextButton.addEventListener("click", () => {
     if (state.queueIndex + 1 < state.queue.length) {
         state.queueIndex += 1;
         playSongWrapper(state.queue[state.queueIndex], true); // Pass the full path
+    } else {
+        handlePlaylistRestart();
     }
 });
 
@@ -306,9 +383,13 @@ window.electronAPI.onPlaylistReady((playlist) => {
     }
     state.playlists.push(playlist);
     window.electronAPI.savePlaylists(state.playlists);
-    renderPlaylists(contextMenu, playlistContextMenu, playlistList);
-    loadPlaylistWrapper(playlist.name);
+    addPlaylistToView(playlist, contextMenu, playlistContextMenu, playlistList);
+    loadPlaylistWrapper(playlist);
 });
+
+window.electronAPI.updatedPlaylistReady((playlist) => {
+    loadPlaylistWrapper(playlist);
+})
 
 window.electronAPI.onPlaylistStartLoad((playlist) => {
     console.log("Loading playlist:", playlist.name);

@@ -5,17 +5,11 @@ import { shuffleArray } from "../utils/arrayUtils.js";
 import { playSongWrapper } from "../renderer.js";
 
 // Load an existing playlist by name and render its songs
-export function renderPlaylistTracks(name, contextMenu, searchTerm = "") {
-    let playlist = state.playlists.find((p) => p.name === name);
+export function renderPlaylistTracks(playlist, contextMenu, searchTerm = "") {
 
-    console.log("Rendering playlist:", name, "with tracks:", playlist);
-
-    if (!playlist) {
-        console.error("Playlist not found:", name);
-        return;
-    }
-
+    console.log(playlist);
     let songs = playlist.tracks;
+
     if (!songs || songs.length === 0) {
         console.log("No songs in this playlist.");
         return;
@@ -32,7 +26,7 @@ export function renderPlaylistTracks(name, contextMenu, searchTerm = "") {
     const songList = document.getElementById("song-list");
     songList.innerHTML = "";
 
-    state.visiblePlaylist = playlist.name;
+    state.visiblePlaylist = playlist;
 
     songs.forEach((song) => {
         const li = document.createElement("li");
@@ -43,12 +37,10 @@ export function renderPlaylistTracks(name, contextMenu, searchTerm = "") {
             li.classList.add("playing");
         }
 
-        // ✨ New: Create album art image element
         const albumArtImg = document.createElement("img");
         albumArtImg.classList.add("album-art");
-        // Use song's album art or a placeholder if it doesn't exist
         albumArtImg.src = song.image || "https://placehold.co/100x100";
-        albumArtImg.alt = song.title; // Accessibility for screen readers
+        albumArtImg.alt = song.title;
 
         const titleDiv = document.createElement("div");
         titleDiv.textContent = truncateText(song.title, 30);
@@ -94,7 +86,7 @@ export function renderPlaylistTracks(name, contextMenu, searchTerm = "") {
     updateCurrentlyPlayingUI();
 }
 
-function truncateText(text, maxLength) {
+export function truncateText(text, maxLength) {
     return text.length > maxLength ? text.slice(0, maxLength - 1) + "…" : text;
 }
 
@@ -119,11 +111,65 @@ export function playPlaylist(playlist, startIndex = 0) {
         state.queueIndex = startIndex;
     }
 
-    state.visiblePlaylist = playlist.name;
-    state.currentPlaylist = playlist.name;
+    state.visiblePlaylist = playlist;
+    state.currentPlaylist = playlist;
     state.playingSingleTrack = false;
     playSongWrapper(state.queue[state.queueIndex], true);
     updateCurrentlyPlayingUI();
+}
+
+export function addPlaylistToView(playlist, contextMenu, playlistContextMenu, playlistList) {
+    const li = document.createElement("li");
+    li.classList.add("playlist-item");
+
+    const title = document.createElement("span");
+    title.textContent = playlist.name;
+
+    const playBtn = document.createElement("button");
+    playBtn.textContent = "▶";
+    playBtn.classList.add("playlist-play-btn");
+    playBtn.onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById("song-search").value = "";
+        renderPlaylistTracks(playlist, contextMenu);
+        playPlaylist(playlist);
+    };
+
+    const optionsBtn = document.createElement("button");
+    optionsBtn.textContent = "⋯";
+    optionsBtn.className = "options-btn";
+    optionsBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const rect = e.target.getBoundingClientRect();
+        openPlaylistContextMenu(
+            rect.right,
+            rect.bottom,
+            playlist.name,
+            playlistContextMenu
+        );
+    });
+
+    li.addEventListener("click", () => {
+        document.getElementById("song-search").value = "";
+        renderPlaylistTracks(playlist, contextMenu);
+    });
+
+    const leftSide = document.createElement("div");
+    leftSide.appendChild(playBtn);
+    leftSide.appendChild(title);
+    leftSide.style.display = "flex";
+    leftSide.style.alignItems = "center";
+    leftSide.style.gap = "10px";
+
+    li.appendChild(leftSide);
+    li.appendChild(optionsBtn);
+
+    const firstLoadingItem = playlistList.querySelector(".loading-playlist");
+    if (firstLoadingItem) {
+        playlistList.insertBefore(li, firstLoadingItem);
+    } else {
+        playlistList.appendChild(li);
+    }
 }
 
 export function renderPlaylists(
@@ -132,6 +178,7 @@ export function renderPlaylists(
     playlistList,
     playlistSearchTerm = ""
 ) {
+    console.log("Rendering playlists with search term:", state.playlists);
     let playlistDisplay = state.playlists;
 
     if (playlistSearchTerm) {
@@ -157,7 +204,7 @@ export function renderPlaylists(
         playBtn.onclick = (e) => {
             e.stopPropagation();
             document.getElementById("song-search").value = "";
-            renderPlaylistTracks(playlist.name, contextMenu);
+            renderPlaylistTracks(playlist, contextMenu);
             playPlaylist(playlist);
         };
 
@@ -177,7 +224,7 @@ export function renderPlaylists(
 
         li.addEventListener("click", () => {
             document.getElementById("song-search").value = "";
-            renderPlaylistTracks(playlist.name, contextMenu);
+            renderPlaylistTracks(playlist, contextMenu);
         });
 
         const leftSide = document.createElement("div");
@@ -204,7 +251,7 @@ export function openPlaylistContextMenu(x, y, playlistName, contextMenu) {
 export function deletePlaylist(playlistName) {
     state.playlists = state.playlists.filter((p) => p.name !== playlistName);
     window.electronAPI.savePlaylists(state.playlists);
-    if (state.visiblePlaylist === playlistName) {
+    if (state.visiblePlaylist.name === playlistName) {
         document.getElementById("song-list").innerHTML = "";
         state.visiblePlaylist = null;
     }

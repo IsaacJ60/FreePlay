@@ -8,19 +8,8 @@ export const state = {
     shuffle: false,
     visiblePlaylist: null,
     currentPlaylist: null,
-    contextMenuSongPath: null,
+    contextMenuSong: null,
+    modalMenuSong: null,
     playingSingleTrack: false,
-};
-
-export const getters = {
-    isPlaying: (state) => state.isPlaying,
-    currentFile: (state) => state.currentFile,
-    playlists: (state) => state.playlists,
-    queue: (state) => state.queue,
-    queueIndex: (state) => state.queueIndex,
-    history: (state) => state.history,
-    shuffle: (state) => state.shuffle,
-    visiblePlaylist: (state) => state.visiblePlaylist,
-    currentPlaylist: (state) => state.currentPlaylist,
-    contextMenuSongPath: (state) => state.contextMenuSongPath,
+    playlistLoop: false,
 };

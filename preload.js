@@ -12,7 +12,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
                 const files = fs.readdirSync(folderPath);
                 const mp3s = files.filter((f) => f.endsWith(".mp3"));
 
-                const userDataPath = await ipcRenderer.invoke("get-user-data-path");
+                const userDataPath = await ipcRenderer.invoke(
+                    "get-user-data-path"
+                );
 
                 const playlistsDir = path.join(userDataPath, "playlists");
                 if (!fs.existsSync(playlistsDir)) {
@@ -55,11 +57,19 @@ contextBridge.exposeInMainWorld("electronAPI", {
     downloadSpotifyPlaylist: (url) => {
         ipcRenderer.send("download-spotify-playlist", url);
     },
-    onPlaylistReady: (callback) => ipcRenderer.on("playlist-folder-ready", (_, data) => callback(data)),
-    onPlaylistStartLoad: (callback) => ipcRenderer.on("playlist-start-load", (_, data) => callback(data)),
+    onPlaylistReady: (callback) =>
+        ipcRenderer.on("playlist-folder-ready", (_, data) => callback(data)),
+    updatedPlaylistReady: (callback) =>
+    ipcRenderer.on("updated-playlist-ready", (event, data) => {
+        callback(data);
+    }),
+    deleteSongFromPlaylist: (data) => ipcRenderer.send("delete-song-from-playlist", data),
+    onPlaylistStartLoad: (callback) =>
+        ipcRenderer.on("playlist-start-load", (_, data) => callback(data)),
     requestSavedPlaylists: () => ipcRenderer.invoke("get-saved-playlists"),
     savePlaylists: (playlists) =>
         ipcRenderer.invoke("save-playlists", playlists),
+    addSongToPlaylist: (data) => ipcRenderer.send("add-song-to-playlist", data),
     toFileUrl: (filePath) => {
         return pathToFileURL(filePath).href;
     },

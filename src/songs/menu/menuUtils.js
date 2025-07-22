@@ -1,7 +1,8 @@
 import { state } from "../../stores/store.js";
 
 export function openContextMenu(x, y, song, contextMenu) {
-    state.contextMenuSongPath = song;
+    state.contextMenuSong = song;
+    state.modalMenuSong = song;
 
     contextMenu.classList.remove("hidden");
     contextMenu.style.visibility = "hidden"; // don't show flash
@@ -37,5 +38,5 @@ export function openContextMenu(x, y, song, contextMenu) {
 
 export function closeContextMenu(contextMenu) {
     contextMenu.classList.add("hidden");
-    state.contextMenuSongPath = null;
+    state.contextMenuSong = null;
 }

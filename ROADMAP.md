@@ -6,11 +6,14 @@ This document outlines the future direction of the FreePlay project. It serves a
 
 ### v1.1 - Metadata Update
 
-- [ ] **Integrate Cover Art and Metadata:**
-    - [ ] Read ID3 tags (or other metadata formats) from audio files to extract information like title, artist, album, and cover art.
-    - [ ] Display the extracted cover art in the main player view.
-    - [ ] Show the song's title, artist, and album information prominently in the UI.
-    - [ ] Update the song list to display metadata instead of just the filename.
+- [x] **Integrate Cover Art and Metadata:**
+    - [x] Display the extracted cover art in the main player view.
+    - [x] Show the song's title, artist, and album information prominently in the UI.
+    - [x] Update the song list to display metadata instead of just the filename.
+    - [x] Fix bug: playlist loading indicators disappear when one of the playlists are loaded
+    - [ ] Fix bug: duplicate playlist names cause issues
+    - [ ] Fix bug: playlist unselected when add song to new playlist
+    - [ ] Test: spotify download - sadge
 
 ### v1.2 - Playlist Enhancements
 
@@ -23,7 +26,7 @@ This document outlines the future direction of the FreePlay project. It serves a
   
 ### v1.3 - Spotify Integration Update
 
-- [ ] **Integrate Better Spotify Downloading System**
+- [ ] **Integrate Better Spotify Downloading System**   
     - [ ] Use https://github.com/Moosync/librespot-node to download songs from spotify as a client.
 
 ### v2.0 - UI/UX Overhaul
