@@ -25,6 +25,7 @@
             <div class="card" id="playlist-songs">
                 <h2>Songs</h2>
                 <input type="text" id="song-search" placeholder="Search in playlist..." />
+                <button id="add-song-btn">Add Song</button>
                 <ul id="song-list"></ul>
             </div>
 
@@ -121,6 +122,19 @@
                 </div>
             </div>
 
+        </div>
+
+        <div id="add-new-song-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Add New Song</h2>
+                <input type="text" id="new-song-url" placeholder="Enter Spotify song URL" />
+                <p >or</p>
+                <button id="upload-local-file-btn">Select local file</button>
+                <div class="modal-buttons">
+                    <button id="cancel-add-new-song-btn">Cancel</button>
+                    <button id="submit-add-new-song-btn">Add</button>
+                </div>
+            </div>
         </div>
 
         <script type="module" src="renderer.js"></script>

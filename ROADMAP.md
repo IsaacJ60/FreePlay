@@ -11,13 +11,12 @@ This document outlines the future direction of the FreePlay project. It serves a
     - [x] Show the song's title, artist, and album information prominently in the UI.
     - [x] Update the song list to display metadata instead of just the filename.
     - [x] Fix bug: playlist loading indicators disappear when one of the playlists are loaded
-    - [ ] Fix bug: duplicate playlist names cause issues
-    - [ ] Fix bug: playlist unselected when add song to new playlist
-    - [ ] Test: spotify download - sadge
+    - [ ] Fix bug: prevent duplicate playlist names
 
 ### v1.2 - Playlist Enhancements
 
 - [ ] **Advanced Playlist Management:**
+    - [ ] Add songs to playlist from spotify or local
     - [ ] Looping playlists
     - [ ] Reorder songs within a playlist.
     - [ ] Edit playlist names.

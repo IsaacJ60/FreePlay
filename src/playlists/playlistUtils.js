@@ -189,6 +189,7 @@ export function renderPlaylists(
         );
     }
 
+    const loadingItems = Array.from(playlistList.querySelectorAll('.loading-playlist'));
     playlistList.innerHTML = "";
 
     playlistDisplay.forEach((playlist) => {
@@ -238,6 +239,8 @@ export function renderPlaylists(
         li.appendChild(optionsBtn);
         playlistList.appendChild(li);
     });
+
+    loadingItems.forEach(item => playlistList.appendChild(item));
 }
 
 export function openPlaylistContextMenu(x, y, playlistName, contextMenu) {

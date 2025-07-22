@@ -26,6 +26,7 @@ const playlistContextMenu = document.getElementById("playlist-context-menu");
 const deletePlaylistBtn = document.getElementById("delete-playlist");
 const songSearch = document.getElementById("song-search");
 const playlistSearch = document.getElementById("playlist-search");
+const addSongBtn = document.getElementById("add-song-btn");
 
 // endregion DOM
 
@@ -81,6 +82,10 @@ function addToQueueWrapper() {
 // endregion queue
 
 // region event listeners
+
+addSongBtn.addEventListener("click", () => {
+    openAddNewSongModal();
+});
 
 songSearch.addEventListener("input", (e) => {
     if (state.visiblePlaylist) {
@@ -174,6 +179,34 @@ addToPlaylistBtn.onclick = () => {
     }
 };
 
+function openAddNewSongModal() {
+    const modal = document.getElementById("add-new-song-modal");
+    const urlInput = document.getElementById("new-song-url");
+    const uploadBtn = document.getElementById("upload-local-file-btn");
+    const cancelBtn = document.getElementById("cancel-add-new-song-btn");
+    const addBtn = document.getElementById("submit-add-new-song-btn");
+
+    modal.classList.remove("hidden");
+
+    uploadBtn.onclick = () => {
+        // Placeholder for file upload logic
+        console.log("Upload local file clicked");
+    };
+
+    cancelBtn.onclick = () => {
+        modal.classList.add("hidden");
+    };
+
+    addBtn.onclick = () => {
+        const url = urlInput.value.trim();
+        if (url) {
+            // Placeholder for Spotify URL logic
+            console.log("Adding song from URL:", url);
+        }
+        modal.classList.add("hidden");
+    };
+}
+
 function openAddToPlaylistModal() {
     const modal = document.getElementById("add-song-to-playlist-modal");
     const playlistListInModal = document.getElementById("playlist-list-in-modal");
@@ -213,13 +246,16 @@ function openAddToPlaylistModal() {
 
     addBtn.onclick = async () => {
         if (selectedPlaylist && state.modalMenuSong) {
-            console.log("ADDING");
-            window.electronAPI.addSongToPlaylist({ playlistName: selectedPlaylist.name, song: state.modalMenuSong });
             modal.classList.add("hidden");
-            state.playlists = await window.electronAPI.requestSavedPlaylists();
-            renderPlaylists(contextMenu, playlistContextMenu, playlistList);
+            await addSongToPlaylistWrapper(selectedPlaylist);
         }
     };
+}
+
+async function addSongToPlaylistWrapper(selectedPlaylist) {
+    window.electronAPI.addSongToPlaylist({ playlistName: selectedPlaylist.name, song: state.modalMenuSong });
+    state.playlists = await window.electronAPI.requestSavedPlaylists();
+    renderPlaylists(contextMenu, playlistContextMenu, playlistList);
 }
 
 deleteSongBtn.onclick = () => {

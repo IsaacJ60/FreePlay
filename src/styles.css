@@ -696,3 +696,59 @@ input[type="range"]::-webkit-slider-thumb {
 #volume-slider::-moz-range-thumb {
     appearance: auto; /* Use default thumb */
 }
+
+#add-song-btn {
+    display: block;
+    width: 95%;
+    margin: 10px auto 20px;
+    padding: 10px;
+    background-color: var(--secondary-button);
+    color: var(--text);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#add-song-btn:hover {
+    background-color: var(--hover);
+}
+
+#add-new-song-modal .modal-content p {
+    text-align: center;
+    margin: 10px 0;
+    color: var(--secondary-text);
+}
+
+#upload-local-file-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--secondary-button);
+    color: var(--text);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#upload-local-file-btn:hover {
+    background-color: var(--hover);
+}
+
+#submit-add-new-song-btn {
+    background-color: var(--accent);
+    color: var(--accent-text);
+}
+
+#submit-add-new-song-btn:hover {
+    background-color: var(--accent-hover);
+}
+
+#cancel-add-new-song-btn {
+    background-color: var(--secondary-button);
+    color: var(--text);
+}
+
+#cancel-add-new-song-btn:hover {
+    background-color: var(--hover);
+}
