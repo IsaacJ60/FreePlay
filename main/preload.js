@@ -2,7 +2,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
 const { pathToFileURL } = require("url");
-const Song = require("./src/models/Song.js");
+const Song = require("../src/models/Song.js");
 
 contextBridge.exposeInMainWorld("electronAPI", {
     getUserDataPath: () => ipcRenderer.invoke("get-user-data-path"),

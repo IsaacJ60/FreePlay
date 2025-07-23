@@ -2,7 +2,7 @@
   "name": "musicplayer",
   "version": "1.0.0",
   "description": "Basic Music Player",
-  "main": "main.js",
+  "main": "main/index.js",
   "scripts": {
     "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1",
