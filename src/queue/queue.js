@@ -1,6 +1,8 @@
 import { state } from "../stores/store.js";
-import { playSongWrapper } from "../renderer.js";
+import { playSongWrapper } from "../songs/songUtils.js";
 import { truncateText } from "../playlists/playlistUtils.js";
+import { updateCurrentlyPlayingUI } from "../utils/renderUtils.js";
+import { domElements } from "../ui/domElements.js";
 
 export function addToQueue(song) {
     state.queue = [
@@ -63,4 +65,15 @@ export function renderQueue(upcomingList, currentTrackElement) {
         li.appendChild(textContainer);
         upcomingList.appendChild(li);
     }
+}
+
+export function addToQueueWrapper() {
+    addToQueue(state.contextMenuSong);
+    updateCurrentlyPlayingUI();
+    renderQueueWrapper();
+}
+
+export function renderQueueWrapper() {
+    renderQueue(domElements.upcomingList, domElements.currentTrackElement);
+    updateCurrentlyPlayingUI();
 }

@@ -1,6 +1,6 @@
 import { state } from "../stores/store.js";
 import { updateCurrentlyPlayingUI } from "../utils/renderUtils.js";
-import { playSongWrapper } from "../renderer.js";
+import { playSongWrapper } from "../songs/songUtils.js";
 
 export function addToHistory(song) {
     if (state.history[0]?.filePath !== song.filePath) {

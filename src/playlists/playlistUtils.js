@@ -2,7 +2,7 @@ import { openContextMenu } from "../songs/menu/menuUtils.js";
 import { state } from "../stores/store.js";
 import { updateCurrentlyPlayingUI } from "../utils/renderUtils.js";
 import { shuffleArray } from "../utils/arrayUtils.js";
-import { playSongWrapper } from "../renderer.js";
+import { playSongWrapper } from "../songs/songUtils.js";
 
 // Load an existing playlist by name and render its songs
 export function renderPlaylistTracks(playlist, contextMenu, searchTerm = "") {
@@ -258,4 +258,8 @@ export function deletePlaylist(playlistName) {
         document.getElementById("song-list").innerHTML = "";
         state.visiblePlaylist = null;
     }
+}
+
+export function loadPlaylistWrapper(playlist, searchTerm = "") {
+    renderPlaylistTracks(playlist, domElements.contextMenu, searchTerm);
 }
