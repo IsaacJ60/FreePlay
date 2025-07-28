@@ -21,8 +21,7 @@ export function playSong(song, fromQueue = false, audio, playButton, trackName) 
         renderQueueWrapper();
     }
 
-    const currentFileName = state.queue[state.queueIndex]?.filePath.split(/[\\/]/).pop();
-    trackName.textContent = currentFileName;
+    trackName.textContent = `${song.title} by ${song.artist}`;
 }
 
 export function deleteSong(song) {

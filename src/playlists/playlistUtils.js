@@ -254,7 +254,7 @@ export function openPlaylistContextMenu(x, y, playlistName, contextMenu) {
 export function deletePlaylist(playlistName) {
     state.playlists = state.playlists.filter((p) => p.name !== playlistName);
     window.electronAPI.savePlaylists(state.playlists);
-    if (state.visiblePlaylist.name === playlistName) {
+    if (state.visiblePlaylist && state.visiblePlaylist.name === playlistName) {
         document.getElementById("song-list").innerHTML = "";
         state.visiblePlaylist = null;
     }
