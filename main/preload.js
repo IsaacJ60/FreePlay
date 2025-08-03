@@ -5,6 +5,7 @@ const { pathToFileURL } = require("url");
 const Song = require("../src/models/Song.js");
 
 contextBridge.exposeInMainWorld("electronAPI", {
+    createSong: (trackInfoOrPath, maybeFilePath) => new Song(trackInfoOrPath, maybeFilePath),
     getUserDataPath: () => ipcRenderer.invoke("get-user-data-path"),
     onFolderSelected: (callback) =>
         ipcRenderer.on("folder-selected", async (e, folderPath) => {
@@ -82,4 +83,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
     onPlaylistLoadError: (callback) =>
         ipcRenderer.on("playlist-load-error", (_, error) => callback(error)),
+    openFileDialog: () => ipcRenderer.invoke("open-file-dialog"),
 });

@@ -40,6 +40,18 @@ app.whenReady().then(() => {
         return app.getPath("userData");
     });
 
+    ipcMain.handle("open-file-dialog", async () => {
+        const { dialog } = require("electron");
+        const result = await dialog.showOpenDialog({
+            properties: ["openFile"],
+            filters: [{ name: "Audio", extensions: ["mp3", "wav", "ogg"] }],
+        });
+        if (result.canceled || result.filePaths.length === 0) {
+            return null;
+        }
+        return result.filePaths[0];
+    });
+
     app.on("activate", () => {
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow();

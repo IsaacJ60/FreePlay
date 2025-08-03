@@ -23,16 +23,28 @@ export function openAddNewSongModal() {
     const uploadBtn = document.getElementById("upload-local-file-btn");
     const cancelBtn = document.getElementById("cancel-add-new-song-btn");
     const addBtn = document.getElementById("submit-add-new-song-btn");
+    const selectedFilePathContainer = document.getElementById("selected-file-path");
+
+    let selectedFilePath = null;
 
     modal.classList.remove("hidden");
+    selectedFilePathContainer.textContent = "";
+    urlInput.value = "";
 
-    uploadBtn.onclick = () => {
-        // Placeholder for file upload logic
-        console.log("Upload local file clicked");
+    uploadBtn.onclick = async () => {
+        const filePath = await window.electronAPI.openFileDialog();
+        if (filePath) {
+            selectedFilePath = filePath;
+            selectedFilePathContainer.textContent = `Selected: ${filePath}`;
+            urlInput.value = "";
+            urlInput.disabled = true;
+        }
     };
 
     cancelBtn.onclick = () => {
         modal.classList.add("hidden");
+        selectedFilePath = null;
+        urlInput.disabled = false;
     };
 
     addBtn.onclick = () => {
@@ -40,8 +52,15 @@ export function openAddNewSongModal() {
         if (url) {
             // Placeholder for Spotify URL logic
             console.log("Adding song from URL:", url);
+        } else if (selectedFilePath) {
+            // Placeholder for local file logic
+            console.log("Adding song from file:", selectedFilePath);
+            const song = window.electronAPI.createSong(selectedFilePath);
+            addSongToPlaylistFileWrapper(state.visiblePlaylist, song);
         }
         modal.classList.add("hidden");
+        selectedFilePath = null;
+        urlInput.disabled = false;
     };
 }
 
@@ -95,6 +114,12 @@ export function openAddToPlaylistModal() {
 
 async function addSongToPlaylistWrapper(selectedPlaylist) {
     window.electronAPI.addSongToPlaylist({ playlistName: selectedPlaylist.name, song: state.modalMenuSong });
+    state.playlists = await window.electronAPI.requestSavedPlaylists();
+    renderPlaylists(domElements.contextMenu, domElements.playlistContextMenu, domElements.playlistList);
+}
+
+async function addSongToPlaylistFileWrapper(selectedPlaylist, song) {
+    window.electronAPI.addSongToPlaylist({ playlistName: selectedPlaylist.name, song: song });
     state.playlists = await window.electronAPI.requestSavedPlaylists();
     renderPlaylists(domElements.contextMenu, domElements.playlistContextMenu, domElements.playlistList);
 }

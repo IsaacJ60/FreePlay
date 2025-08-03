@@ -17,11 +17,16 @@ This document outlines the future direction of the FreePlay project. It serves a
 
 - [ ] **Advanced Playlist Management:**
     - [ ] Add songs to playlist from spotify or local
+      - [ ] add song given path
+      - [ ] try using zotify for spotify music download (create the infrastructure for single song downloads with zotify, then can use for bulk downloads)
     - [ ] Looping playlists
+      - [ ] legit just call playplaylist on whatever playlist is currently being played IF the last song is done
     - [ ] Reorder songs within a playlist.
+      - [ ] look into drag and drop solutions, otherwise use buttons (similar to photoshop layers (bring forward, bring to top))
     - [ ] Edit playlist names.
+      - [ ] simple menu item with modal for renaming
     - [ ] Add a "favorites" or "liked songs" playlist.
-    - [ ] Export and import playlists.
+      - [ ] permanent playlist that app boots with empty if doesnt already exist (check if folder exists)
   
 ### v1.3 - Spotify Integration Update
 
