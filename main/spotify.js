@@ -4,7 +4,7 @@ const path = require("path");
 const fetch = require("isomorphic-unfetch");
 const { getData, getPreview } = require("spotify-url-info")(fetch);
 const ytdlp = require("youtube-dl-exec");
-const Song = require("../src/models/Song.js");
+const Song = require("./models/Song.js");
 const { spawn } = require("child_process");
 
 function enhanceAudio(filePath) {

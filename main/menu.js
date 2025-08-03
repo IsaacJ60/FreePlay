@@ -1,5 +1,5 @@
 const { Menu, dialog, shell } = require("electron/main");
-const Song = require("../src/models/Song.js");
+const Song = require("./models/Song.js");
 
 function createMenu(win) {
     const menuTemplate = [

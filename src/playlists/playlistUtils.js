@@ -3,6 +3,7 @@ import { state } from "../stores/store.js";
 import { updateCurrentlyPlayingUI } from "../utils/renderUtils.js";
 import { shuffleArray } from "../utils/arrayUtils.js";
 import { playSongWrapper } from "../songs/songUtils.js";
+import { domElements } from "../ui/domElements.js";
 
 // Load an existing playlist by name and render its songs
 export function renderPlaylistTracks(playlist, contextMenu, searchTerm = "") {

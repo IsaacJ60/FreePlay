@@ -6,16 +6,27 @@
   "scripts": {
     "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "vite build",
+    "build": "vite build && electron-builder",
     "dev": "vite"
   },
   "build": {
-    "icon": "assets/favicon"
+    "appId": "com.isaacjiang.freeplay",
+    "productName": "FreePlay",
+    "files": [
+      "dist/**/*",
+      "main/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "icon": "assets/favicon.ico"
   },
   "author": "Isaac Jiang",
   "license": "MIT",
   "devDependencies": {
     "electron": "^37.2.0",
+    "electron-builder": "^26.0.12",
     "vite": "^7.0.4"
   },
   "dependencies": {
