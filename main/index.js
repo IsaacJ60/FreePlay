@@ -30,6 +30,7 @@ const createWindow = () => {
 };
 
 app.whenReady().then(() => {
+    console.log("[Main] App is ready, creating window.");
     createWindow();
 
     // Register IPC handlers

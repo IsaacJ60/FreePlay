@@ -172,14 +172,16 @@ function calculateScore(video, spotifyTrack) {
 
 function registerSpotifyHandlers() {
     ipcMain.on("download-spotify-playlist", async (event, url) => {
+        console.log(`[Spotify] Received request to download playlist: ${url}`);
         try {
             const data = await getData(url);
             if (!data) {
+                console.error("[Spotify] ERROR: Could not fetch playlist data, it may be private or invalid.");
                 event.sender.send("playlist-load-error");
                 return;
             }
 
-            console.log("Playlist data:", data);
+            console.log(`[Spotify] Successfully fetched data for playlist: "${data.name}"`);
 
             const playlistsDir = path.join(
                 app.getPath("userData"),
@@ -199,151 +201,15 @@ function registerSpotifyHandlers() {
                 name: data.name,
             });
 
-            console.log("SAVEPATH:", savePath);
+            console.log(`[Spotify] Downloading ${data.trackList.length} songs to "${savePath}"`);
 
-            const songList = [];
-            for (const item of data.trackList) {
-                const songUrl =
-                    "https://open.spotify.com/track/" +
-                    item.uri.replace("spotify:track:", "");
-                let songData;
+            const songPromises = data.trackList.map(item => 
+                downloadSpotifySong(item, savePath)
+            );
+            const resolvedSongs = await Promise.all(songPromises);
+            const songList = resolvedSongs.filter(song => song); // Filter out any undefined results
 
-                try {
-                    songData = await getPreview(songUrl);
-                } catch (error) {
-                    console.error("Error fetching song data:", error);
-                    continue;
-                }
-
-                if (!songData) {
-                    console.log("Failed to fetch song data for:", item.title);
-                    continue;
-                }
-
-                const title = `${item.title} - ${item.subtitle}`;
-                const searchQuery = `${item.title} ${item.subtitle}`;
-                const outputPath = path.join(
-                    savePath,
-                    `${sanitize(title)}.wav`
-                );
-
-                try {
-                    const spotifyTrack = {
-                        title: item.title,
-                        artist: item.subtitle,
-                        duration: songData.duration, // in milliseconds
-                    };
-
-                    let modifier = "";
-
-                    if (
-                        spotifyTrack.title.toLowerCase().includes("lofi") ||
-                        spotifyTrack.artist.toLowerCase().includes("lofi") ||
-                        spotifyTrack.title.toLowerCase().includes("version") ||
-                        spotifyTrack.title.toLowerCase().includes("remix")
-                    ) {
-                        modifier = "";
-                    } else {
-                        modifier = " Official Audio";
-                    }
-
-                    const searchResults = await ytdlp.exec(
-                        `ytsearch3:${searchQuery}${modifier}`,
-                        {
-                            dumpJson: true,
-                            defaultSearch: "ytsearch",
-                        }
-                    );
-
-                    console.log(`Searched for: "${searchQuery}${modifier}"`);
-
-                    const videoMetadatas = searchResults.stdout
-                        .trim()
-                        .split("\n")
-                        .map(JSON.parse);
-
-                    let bestVideo = null;
-                    let highestScore = -10000;
-
-                    videoMetadatas.forEach((video, index) => {
-                        let score = calculateScore(video, spotifyTrack);
-
-                        // Add bonus points for top results
-                        if (index === 0) {
-                            score += 15;
-                        }
-
-                        console.log(
-                            `Scoring "${video.title}" (result #${
-                                index + 1
-                            }): ${score}`
-                        );
-                        if (score > highestScore) {
-                            highestScore = score;
-                            bestVideo = video;
-                        }
-                    });
-
-                    if (!bestVideo) {
-                        console.log(
-                            `No suitable video found for "${spotifyTrack.title}".`
-                        );
-                        continue;
-                    }
-
-                    console.log(
-                        `Best match for "${spotifyTrack.title}": "${bestVideo.title}" with score ${highestScore}`
-                    );
-
-                    const ytdlpProcess = ytdlp.exec(bestVideo.webpage_url, {
-                        extractAudio: true,
-                        audioFormat: "wav",
-                        output: outputPath,
-                    });
-
-                    ytdlpProcess.stdout.on("data", (data) => {
-                        console.log(`ytdlp stdout: ${data}`);
-                    });
-
-                    ytdlpProcess.stderr.on("data", (data) => {
-                        console.error(`ytdlp stderr: ${data}`);
-                    });
-
-                    await ytdlpProcess;
-                } catch (e) {
-                    console.error(
-                        "Error during video metadata processing, falling back to simple download:",
-                        e
-                    );
-
-                    const ytdlpProcess = ytdlp.exec(
-                        `ytsearch1:${searchQuery} Official Audio Music`,
-                        {
-                            extractAudio: true,
-                            audioFormat: "wav",
-                            output: outputPath,
-                            defaultSearch: "ytsearch",
-                        }
-                    );
-
-                    ytdlpProcess.stdout.on("data", (data) => {
-                        console.log(`ytdlp stdout: ${data}`);
-                    });
-
-                    ytdlpProcess.stderr.on("data", (data) => {
-                        console.error(`ytdlp stderr: ${data}`);
-                    });
-
-                    await ytdlpProcess;
-                }
-
-                console.log(`Downloaded to: ${outputPath}`);
-
-                // await enhanceAudio(outputPath);
-
-                const song = new Song(songData, outputPath);
-                songList.push(song);
-            }
+            console.log(`[Spotify] Download complete. Successfully downloaded ${songList.length} of ${data.trackList.length} songs.`);
 
             event.sender.send("playlist-folder-ready", {
                 name: data.name,
@@ -351,7 +217,7 @@ function registerSpotifyHandlers() {
                 tracks: songList,
             });
         } catch (e) {
-            console.log("Error downloading Spotify playlist:", e);
+            console.error("[Spotify] ERROR: An unexpected error occurred during playlist download:", e);
 
             let message = "Failed to download the playlist.";
             if (
@@ -362,12 +228,134 @@ function registerSpotifyHandlers() {
                     "The playlist could not be loaded. Please make sure it is public.";
             }
 
-            // Notify renderer of the error
             event.sender.send("playlist-load-error", {
                 error: message,
             });
         }
     });
+
+    ipcMain.handle("download-spotify-song", async (event, url, visiblePlaylistPath) => {
+        console.log(`[Spotify] Received request to download song: ${url}`);
+        const data = await getData(url);
+        const song = await downloadSpotifySong(data, visiblePlaylistPath);
+        return song;
+    });
+}
+
+async function downloadSpotifySong(item, savePath) {
+    const trackTitleForLogging = item.title || item.name || 'Unknown Track';
+    console.log(`[Spotify] Starting download for: "${trackTitleForLogging}"`);
+
+    const songUrl =
+        "https://open.spotify.com/track/" +
+        item.uri.replace("spotify:track:", "");
+    let songData;
+
+    try {
+        songData = await getPreview(songUrl);
+    } catch (error) {
+        console.error(`[Spotify] ERROR: Failed to fetch Spotify preview for "${trackTitleForLogging}".`, error);
+        return;
+    }
+
+    if (!songData || !songData.title) {
+        console.error(`[Spotify] ERROR: Invalid or empty Spotify preview data for "${trackTitleForLogging}". Skipping.`);
+        return;
+    }
+
+    const title = `${songData.title} - ${songData.artist}`;
+    const searchQuery = `${songData.title} ${songData.artist}`;
+    const outputPath = path.join(
+        savePath,
+        `${sanitize(title)}.wav`
+    );
+
+    try {
+        const spotifyTrack = {
+            title: songData.title,
+            artist: songData.artist,
+            duration: songData.duration, // in milliseconds
+        };
+
+        let modifier = "";
+
+        if (
+            spotifyTrack.title.toLowerCase().includes("lofi") ||
+            spotifyTrack.artist.toLowerCase().includes("lofi") ||
+            spotifyTrack.title.toLowerCase().includes("version") ||
+            spotifyTrack.title.toLowerCase().includes("remix")
+        ) {
+            modifier = "";
+        } else {
+            modifier = " Official Audio";
+        }
+
+        const searchResults = await ytdlp.exec(
+            `ytsearch3:${searchQuery}${modifier}`,
+            {
+                dumpJson: true,
+                defaultSearch: "ytsearch",
+            }
+        );
+
+        const videoMetadatas = searchResults.stdout
+            .trim()
+            .split("\n")
+            .map(JSON.parse);
+
+        let bestVideo = null;
+        let highestScore = -10000;
+
+        videoMetadatas.forEach((video, index) => {
+            let score = calculateScore(video, spotifyTrack);
+
+            if (index === 0) {
+                score += 15;
+            }
+
+            if (score > highestScore) {
+                highestScore = score;
+                bestVideo = video;
+            }
+        });
+
+        if (!bestVideo) {
+            console.error(`[Spotify] ERROR: No suitable YouTube video found for "${spotifyTrack.title}". Skipping.`);
+            return;
+        }
+
+        console.log(`[Spotify] Best match for "${spotifyTrack.title}" is "${bestVideo.title}" with score ${highestScore}. Starting download.`);
+
+        await ytdlp.exec(bestVideo.webpage_url, {
+            extractAudio: true,
+            audioFormat: "wav",
+            output: outputPath,
+        });
+
+    } catch (e) {
+        console.error(
+            `[Spotify] ERROR: YouTube download failed for "${songData.title}". Attempting fallback.`, e
+        );
+
+        try {
+            await ytdlp.exec(
+                `ytsearch1:${searchQuery} Official Audio Music`,
+                {
+                    extractAudio: true,
+                    audioFormat: "wav",
+                    output: outputPath,
+                    defaultSearch: "ytsearch",
+                }
+            );
+        } catch (fallbackError) {
+            console.error(`[Spotify] ERROR: Fallback download also failed for "${songData.title}".`, fallbackError);
+            return;
+        }
+    }
+
+    console.log(`[Spotify] Successfully downloaded "${title}" to "${outputPath}"`);
+    const song = new Song(songData, outputPath);
+    return song;
 }
 
 module.exports = {

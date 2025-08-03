@@ -1,6 +1,6 @@
 {
   "name": "musicplayer",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Basic Music Player",
   "main": "main/index.js",
   "scripts": {

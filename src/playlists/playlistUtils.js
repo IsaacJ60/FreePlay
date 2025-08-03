@@ -193,6 +193,10 @@ export function renderPlaylists(
     const loadingItems = Array.from(playlistList.querySelectorAll('.loading-playlist'));
     playlistList.innerHTML = "";
 
+    if (playlistDisplay.length === 0) {
+        console.log("[UI] No playlists match the search term, displaying nothing.");
+    }
+
     playlistDisplay.forEach((playlist) => {
         const li = document.createElement("li");
         li.classList.add("playlist-item");

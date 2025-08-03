@@ -3,6 +3,7 @@ import { updateCurrentlyPlayingUI } from "../utils/renderUtils.js";
 import { playSongWrapper } from "../songs/songUtils.js";
 
 export function addToHistory(song) {
+    console.log(`[History] Adding song to history: "${song.title}"`);
     if (state.history[0]?.filePath !== song.filePath) {
         state.history.unshift(song);
         if (state.history.length > 10) {

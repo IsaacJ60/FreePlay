@@ -15,15 +15,22 @@ function getCurrentPlaylist() {
 }
 
 export function setupPlayerControls() {
+    console.log("[Player] Setting up player controls...");
+
     domElements.playButton.addEventListener("click", () => {
-        if (!domElements.audio.src) return;
+        if (!domElements.audio.src) {
+            console.warn("[Player] WARNING: Play button clicked but no audio source is set.");
+            return;
+        }
 
         if (state.isPlaying) {
             domElements.audio.pause();
             domElements.playButton.textContent = "▶";
+            console.log("[Player] Paused audio.");
         } else {
             domElements.audio.play();
             domElements.playButton.textContent = "⏸";
+            console.log("[Player] Playing audio.");
         }
 
         state.isPlaying = !state.isPlaying;
@@ -33,8 +40,11 @@ export function setupPlayerControls() {
         if (!domElements.audio.src) return;
 
         if (state.queueIndex > 0) {
+            console.log("[Player] Playing previous song.");
             state.queueIndex -= 1;
             playSongWrapper(state.queue[state.queueIndex], true);
+        } else {
+            console.log("[Player] Already at the first song. No previous song to play.");
         }
     });
 
@@ -42,16 +52,18 @@ export function setupPlayerControls() {
         if (!domElements.audio.src) return;
 
         if (state.queueIndex + 1 < state.queue.length) {
+            console.log("[Player] Playing next song.");
             playNextSong();
         } else {
+            console.log("[Player] End of queue reached.");
             handlePlaylistRestart();
         }
     });
 
     domElements.shuffleButton.addEventListener("click", () => {
         state.shuffle = !state.shuffle;
-        domElements.shuffleButton.style.opacity = state.shuffle ? "1" : "0.5"; // optional visual cue
-        console.log(`Shuffle: ${state.shuffle}`);
+        domElements.shuffleButton.style.opacity = state.shuffle ? "1" : "0.5";
+        console.log(`[Player] Shuffle mode toggled: ${state.shuffle ? 'On' : 'Off'}`);
     });
 
     domElements.audio.addEventListener("timeupdate", () => {

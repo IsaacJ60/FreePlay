@@ -25,7 +25,7 @@ export function playSong(song, fromQueue = false, audio, playButton, trackName) 
 }
 
 export function deleteSong(song) {
-    console.log("Deleting song:", song);
+    console.log(`[UI] Deleting song: "${song.title}" from playlist: "${state.visiblePlaylist.name}"`);
     window.electronAPI.deleteSongFromPlaylist({ playlistName: state.visiblePlaylist.name, song: song });
 }
 

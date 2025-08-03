@@ -8,20 +8,27 @@ import { state } from "../stores/store.js";
 import { renderPlaylists } from "../playlists/playlistUtils.js";
 
 export async function initializeApplication() {
-    const savedDarkMode = localStorage.getItem("darkMode");
+    console.log("[App] Initializing application...");
 
+    const savedDarkMode = localStorage.getItem("darkMode");
+    if (savedDarkMode === "true") {
+        console.log("[App] Dark mode found in local storage. Applying.");
+        document.body.classList.add("dark");
+    }
+
+    console.log("[App] Setting up event listeners...");
     setupPlayerControls();
     setupSpotifyEventListeners();
     setupUIEventListeners();
     setupElectronEventListeners();
 
     updateSliderFill(domElements.seekSlider);
-    if (savedDarkMode === "true") {
-        document.body.classList.add("dark");
-    }
     domElements.shuffleButton.style.opacity = "0.5";
 
+    console.log("[App] Requesting saved playlists from main process...");
     state.playlists = await window.electronAPI.requestSavedPlaylists();
+    console.log(`[App] Received ${state.playlists.length} playlists.`);
 
     renderPlaylists(domElements.contextMenu, domElements.playlistContextMenu, domElements.playlistList);
+    console.log("[App] Application initialized.");
 }

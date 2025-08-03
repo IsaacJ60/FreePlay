@@ -5,12 +5,14 @@ import { playSongWrapper } from "../songs/songUtils.js";
 import { updateCurrentlyPlayingUI } from "../utils/renderUtils.js";
 
 export function setupElectronEventListeners() {
+    console.log("[ElectronRenderer] Setting up Electron event listeners.");
+
     // handle selecting local folder to use as playlist
     window.electronAPI.onFolderSelected((playlist) => {
-        console.log("Folder Selected:", playlist.name);
+        console.log(`[ElectronRenderer] Received folder selection: "${playlist.name}"`);
         const exists = state.playlists.some((p) => p.name === playlist.name);
         if (exists) {
-            console.log(`Playlist "${playlist.name}" already exists. Skipping.`);
+            console.warn(`[ElectronRenderer] WARNING: Playlist "${playlist.name}" already exists. Skipping.`);
             return;
         }
 
@@ -22,12 +24,14 @@ export function setupElectronEventListeners() {
     });
 
     window.electronAPI.toggleDarkMode(() => {
+        console.log("[ElectronRenderer] Toggling dark mode.");
         document.body.classList.toggle("dark");
         localStorage.setItem("darkMode", document.body.classList.contains("dark"));
     });
 
     // Handle file selection from the file dialog
     window.electronAPI.onFileSelected((song) => {
+        console.log(`[ElectronRenderer] Received file selection: "${song.title}"`);
         playSongWrapper(song, false);
         updateCurrentlyPlayingUI();
     });

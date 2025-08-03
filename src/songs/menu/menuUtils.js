@@ -1,6 +1,7 @@
 import { state } from "../../stores/store.js";
 
 export function openContextMenu(x, y, song, contextMenu) {
+    console.log(`[UI] Opening context menu for song: "${song.title}"`);
     state.contextMenuSong = song;
     state.modalMenuSong = song;
 

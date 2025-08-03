@@ -57,7 +57,7 @@ export function setupSpotifyEventListeners() {
     })
 
     window.electronAPI.onPlaylistStartLoad((playlist) => {
-        console.log("Loading playlist:", playlist.name);
+        console.log(`[SpotifyRenderer] Started loading playlist: "${playlist.name}"`);
 
         const safeId = `loading-${playlist.name
             .replace(/\s+/g, "-")

@@ -24,12 +24,19 @@ export function openAddNewSongModal() {
     const cancelBtn = document.getElementById("cancel-add-new-song-btn");
     const addBtn = document.getElementById("submit-add-new-song-btn");
     const selectedFilePathContainer = document.getElementById("selected-file-path");
+    const loader = modal.querySelector(".loader");
 
     let selectedFilePath = null;
 
+    // Reset state
     modal.classList.remove("hidden");
     selectedFilePathContainer.textContent = "";
     urlInput.value = "";
+    urlInput.disabled = false;
+    addBtn.disabled = false;
+    cancelBtn.disabled = false;
+    loader.classList.add("hidden");
+
 
     uploadBtn.onclick = async () => {
         const filePath = await window.electronAPI.openFileDialog();
@@ -47,20 +54,43 @@ export function openAddNewSongModal() {
         urlInput.disabled = false;
     };
 
-    addBtn.onclick = () => {
+    addBtn.onclick = async () => {
         const url = urlInput.value.trim();
-        if (url) {
-            // Placeholder for Spotify URL logic
-            console.log("Adding song from URL:", url);
-        } else if (selectedFilePath) {
-            // Placeholder for local file logic
-            console.log("Adding song from file:", selectedFilePath);
-            const song = window.electronAPI.createSong(selectedFilePath);
-            addSongToPlaylistFileWrapper(state.visiblePlaylist, song);
+        
+        // Show loader and disable buttons
+        loader.classList.remove("hidden");
+        addBtn.disabled = true;
+        cancelBtn.disabled = true;
+        urlInput.disabled = true;
+        uploadBtn.disabled = true;
+
+        try {
+            if (url) {
+                console.log(`[UI] Attempting to download Spotify song from URL: ${url}`);
+                const song = await window.electronAPI.downloadSpotifySong(url, state.visiblePlaylist.path);
+                if (song) {
+                    console.log(`[UI] Song downloaded successfully. Adding to playlist: "${state.visiblePlaylist.name}"`);
+                    addSongToPlaylistFileWrapper(state.visiblePlaylist, song);
+                } else {
+                    console.error("[UI] ERROR: downloadSpotifySong returned no song object.");
+                }
+            } else if (selectedFilePath) {
+                console.log(`[UI] Adding local song from path: ${selectedFilePath}`);
+                const song = window.electronAPI.createSong(selectedFilePath);
+                addSongToPlaylistFileWrapper(state.visiblePlaylist, song);
+            }
+        } catch (error) {
+            console.error("[UI] ERROR: An error occurred while adding a new song:", error);
+        } finally {
+            // Hide loader and re-enable buttons
+            loader.classList.add("hidden");
+            addBtn.disabled = false;
+            cancelBtn.disabled = false;
+            urlInput.disabled = false;
+            uploadBtn.disabled = false;
+            modal.classList.add("hidden");
+            selectedFilePath = null;
         }
-        modal.classList.add("hidden");
-        selectedFilePath = null;
-        urlInput.disabled = false;
     };
 }
 

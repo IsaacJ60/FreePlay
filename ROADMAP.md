@@ -16,9 +16,9 @@ This document outlines the future direction of the FreePlay project. It serves a
 ### v1.2 - Playlist Enhancements
 
 - [ ] **Advanced Playlist Management:**
-    - [ ] Add songs to playlist from spotify or local
-      - [ ] add song given path
-      - [ ] try using zotify for spotify music download (create the infrastructure for single song downloads with zotify, then can use for bulk downloads)
+    - [x] Add songs to playlist from spotify or local
+      - [x] add song given path
+      - [x] yt dlp spotify download single songs
     - [ ] Looping playlists
       - [ ] legit just call playplaylist on whatever playlist is currently being played IF the last song is done
     - [ ] Reorder songs within a playlist.

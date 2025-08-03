@@ -13,6 +13,7 @@ export function addToQueue(song) {
 }
 
 export function renderQueue(upcomingList, currentTrackElement) {
+    console.log("[UI] Rendering queue.");
     upcomingList.innerHTML = "";
 
     if (state.queue.length === 0) {

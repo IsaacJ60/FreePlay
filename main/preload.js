@@ -6,6 +6,8 @@ const Song = require("./models/Song.js");
 
 contextBridge.exposeInMainWorld("electronAPI", {
     createSong: (trackInfoOrPath, maybeFilePath) => new Song(trackInfoOrPath, maybeFilePath),
+    downloadSpotifySong: (url, visiblePlaylistPath) => 
+        ipcRenderer.invoke("download-spotify-song", url, visiblePlaylistPath),
     getUserDataPath: () => ipcRenderer.invoke("get-user-data-path"),
     onFolderSelected: (callback) =>
         ipcRenderer.on("folder-selected", async (e, folderPath) => {
@@ -46,7 +48,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
                     tracks: songList,
                 });
             } catch (err) {
-                console.error("Error reading folder:", err);
+                console.error("[Preload] ERROR: Error reading folder:", err);
             }
         }),
     onFileSelected: (callback) =>

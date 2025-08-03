@@ -42,6 +42,7 @@ function createMenu(win) {
                 {
                     label: "Download Playlist/Folder (Spotify)",
                     click: () => {
+                        console.log("[Menu] Clicked 'Download Playlist/Folder (Spotify)'");
                         win.webContents.send("spotify-download");
                     },
                 },
