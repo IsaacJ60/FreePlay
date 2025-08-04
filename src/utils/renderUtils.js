@@ -1,6 +1,7 @@
 import { state } from "../stores/store.js";
 
 export function updateCurrentlyPlayingUI() {
+    console.log("[UI] Updating currently playing UI highlights.");
     const songItems = document.querySelectorAll("#song-list li");
     const isSamePlaylist = state.currentPlaylist?.name === state.visiblePlaylist?.name;
 

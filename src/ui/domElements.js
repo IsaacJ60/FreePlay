@@ -1,3 +1,5 @@
+console.log("[DOM] Caching DOM elements.");
+
 export const domElements = {
     currentTrackElement: document.getElementById("current-track"),
     upcomingList: document.getElementById("upcoming-tracks"),
@@ -8,6 +10,7 @@ export const domElements = {
     prevButton: document.getElementById("prev"),
     nextButton: document.getElementById("next"),
     shuffleButton: document.getElementById("shuffle"),
+    loopButton: document.getElementById("loop"),
     contextMenu: document.getElementById("context-menu"),
     addToQueueBtn: document.getElementById("add-to-front"),
     addToPlaylistBtn: document.getElementById("add-to-playlist"),

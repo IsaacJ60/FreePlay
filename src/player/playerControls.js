@@ -66,6 +66,12 @@ export function setupPlayerControls() {
         console.log(`[Player] Shuffle mode toggled: ${state.shuffle ? 'On' : 'Off'}`);
     });
 
+    domElements.loopButton.addEventListener("click", () => {
+        state.playlistLoop = !state.playlistLoop;
+        domElements.loopButton.style.opacity = state.playlistLoop ? "1" : "0.5";
+        console.log(`[Player] Loop playlist mode toggled: ${state.playlistLoop ? 'On' : 'Off'}`);
+    });
+
     domElements.audio.addEventListener("timeupdate", () => {
         if (!isNaN(domElements.audio.duration) && !domElements.seekSlider.dragging) {
             domElements.seekSlider.value = (domElements.audio.currentTime / domElements.audio.duration) * 100;

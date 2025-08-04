@@ -1,3 +1,5 @@
+console.log("[Store] Initializing application state.");
+
 export const state = {
     isPlaying: false,
     currentFile: null,

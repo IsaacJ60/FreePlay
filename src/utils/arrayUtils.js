@@ -1,4 +1,5 @@
 export function shuffleArray(array) {
+    console.log("[Util] Shuffling array.");
     const copy = [...array];
     for (let i = copy.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));

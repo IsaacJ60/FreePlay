@@ -324,13 +324,23 @@ async function downloadSpotifySong(item, savePath) {
             return;
         }
 
-        console.log(`[Spotify] Best match for "${spotifyTrack.title}" is "${bestVideo.title}" with score ${highestScore}. Starting download.`);
+        console.log(`[Spotify] Best match for "${spotifyTrack.title}" is "${bestVideo.title}" with score ${highestScore}. Starting ytdlp download.`);
 
-        await ytdlp.exec(bestVideo.webpage_url, {
+        const ytdlpProcess = ytdlp.exec(bestVideo.webpage_url, {
             extractAudio: true,
             audioFormat: "wav",
             output: outputPath,
         });
+
+        ytdlpProcess.stdout.on("data", (data) => {
+            console.log(`[ytdlp] stdout: ${data}`);
+        });
+
+        ytdlpProcess.stderr.on("data", (data) => {
+            console.error(`[ytdlp] stderr: ${data}`);
+        });
+
+        await ytdlpProcess;
 
     } catch (e) {
         console.error(

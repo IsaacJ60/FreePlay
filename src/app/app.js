@@ -24,6 +24,7 @@ export async function initializeApplication() {
 
     updateSliderFill(domElements.seekSlider);
     domElements.shuffleButton.style.opacity = "0.5";
+    domElements.loopButton.style.opacity = "0.5";
 
     console.log("[App] Requesting saved playlists from main process...");
     state.playlists = await window.electronAPI.requestSavedPlaylists();
