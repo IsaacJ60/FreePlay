@@ -10,12 +10,6 @@ import { renderPlaylists } from "../playlists/playlistUtils.js";
 export async function initializeApplication() {
     console.log("[App] Initializing application...");
 
-    const savedDarkMode = localStorage.getItem("darkMode");
-    if (savedDarkMode === "true") {
-        console.log("[App] Dark mode found in local storage. Applying.");
-        document.body.classList.add("dark");
-    }
-
     console.log("[App] Setting up event listeners...");
     setupPlayerControls();
     setupSpotifyEventListeners();
@@ -25,6 +19,19 @@ export async function initializeApplication() {
     updateSliderFill(domElements.seekSlider);
     domElements.shuffleButton.style.opacity = "0.5";
     domElements.loopButton.style.opacity = "0.5";
+
+    const savedDarkMode = localStorage.getItem("darkMode");
+    if (savedDarkMode === "true") {
+        console.log("[App] Dark mode found in local storage. Applying.");
+        document.body.classList.add("dark");
+    }
+
+    const savedPlaylistLoop = localStorage.getItem("playlistLoop");
+    if (savedPlaylistLoop === "true") {
+        console.log("[App] Playlist loop mode found in local storage. Applying.");
+        state.playlistLoop = true;
+        domElements.loopButton.style.opacity = state.playlistLoop ? "1" : "0.5";
+    }
 
     console.log("[App] Requesting saved playlists from main process...");
     state.playlists = await window.electronAPI.requestSavedPlaylists();

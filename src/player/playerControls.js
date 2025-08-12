@@ -69,6 +69,7 @@ export function setupPlayerControls() {
     domElements.loopButton.addEventListener("click", () => {
         state.playlistLoop = !state.playlistLoop;
         domElements.loopButton.style.opacity = state.playlistLoop ? "1" : "0.5";
+        localStorage.setItem("playlistLoop", state.playlistLoop);
         console.log(`[Player] Loop playlist mode toggled: ${state.playlistLoop ? 'On' : 'Off'}`);
     });
 

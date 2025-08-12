@@ -19,8 +19,8 @@ This document outlines the future direction of the FreePlay project. It serves a
     - [x] Add songs to playlist from spotify or local
       - [x] add song given path
       - [x] yt dlp spotify download single songs
-    - [ ] Looping playlists
-      - [ ] legit just call playplaylist on whatever playlist is currently being played IF the last song is done
+    - [x] Looping playlists
+      - [x] legit just call playplaylist on whatever playlist is currently being played IF the last song is done
     - [ ] Reorder songs within a playlist.
       - [ ] look into drag and drop solutions, otherwise use buttons (similar to photoshop layers (bring forward, bring to top))
     - [ ] Edit playlist names.
